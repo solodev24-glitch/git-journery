@@ -1,0 +1,844 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Meal History - Hostel Mess</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Segoe UI', sans-serif;
+            background: #f1f5f9;
+            color: #1e293b;
+            padding-top: 10px;
+        }
+
+        /* ===== HEADER ===== */
+        .header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            background: rgba(12, 18, 28, 0.97);
+            padding: 16px 40px;
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
+            z-index: 1000;
+        }
+
+        .header-content {
+            display: flex;
+            align-items: center;
+            gap: 24px;
+            justify-content: space-between;
+        }
+
+        .header-logo {
+            width: 64px;
+            height: 64px;
+            border-radius: 50%;
+            background: #ffffff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+
+        .header-logo img {
+            width: 42px;
+            height: 42px;
+            border-radius: 50%;
+            object-fit: cover;
+        }
+
+        .header-title {
+            font-size: 1.8rem;
+            font-weight: 800;
+            background: linear-gradient(90deg, #f43f5e, #fb7185, #fda4af);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .navbar {
+            margin-top: 6px;
+            display: flex;
+            gap: 22px;
+            align-items: center;
+        }
+
+        .navbar a {
+            position: relative;
+            color: #d1d5db;
+            text-decoration: none;
+            font-size: 0.88rem;
+            font-weight: 600;
+            transition: color 0.25s;
+        }
+
+        .navbar a:hover {
+            color: #f43f5e;
+        }
+
+        .navbar a::after {
+            content: "";
+            position: absolute;
+            left: 0;
+            bottom: -6px;
+            width: 0;
+            height: 2px;
+            background: #f43f5e;
+            transition: width 0.25s;
+        }
+
+        .navbar a:hover::after {
+            width: 100%;
+        }
+
+        /* ===== CONTAINER ===== */
+        .container {
+            max-width: 1000px;
+            margin: 120px auto 40px;
+            padding: 0 20px;
+        }
+
+        /* ===== CARD ===== */
+        .card {
+            background: #ffffff;
+            border-radius: 18px;
+            padding: 30px;
+            box-shadow: 0 12px 36px rgba(0, 0, 0, 0.1);
+        }
+
+        .card h2 {
+            text-align: center;
+            margin-bottom: 10px;
+            color: #1e293b;
+            font-size: 2rem;
+        }
+
+        .date-info {
+            text-align: center;
+            color: #64748b;
+            margin-bottom: 30px;
+            font-size: 1.1rem;
+        }
+
+        /* ===== STUDENT INFO ===== */
+        .student-info {
+            background: linear-gradient(135deg, #0f172a, #1e293b);
+            color: #fff;
+            padding: 20px;
+            border-radius: 12px;
+            margin-bottom: 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        .student-info h3 {
+            font-size: 1.5rem;
+            margin-bottom: 5px;
+        }
+
+        .student-info p {
+            color: #cbd5e1;
+        }
+
+        .account-badge {
+            background: #f43f5e;
+            padding: 8px 16px;
+            border-radius: 30px;
+            font-weight: bold;
+            font-size: 1.2rem;
+        }
+
+        /* ===== DATE FILTER ===== */
+        .date-filter {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 25px;
+            flex-wrap: wrap;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .date-input {
+            padding: 10px 15px;
+            border: 2px solid #e2e8f0;
+            border-radius: 8px;
+            font-size: 1rem;
+            outline: none;
+        }
+
+        .date-input:focus {
+            border-color: #f43f5e;
+        }
+
+        .filter-btn {
+            padding: 10px 20px;
+            background: #b3123c;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .filter-btn:hover {
+            background: #9f0f35;
+        }
+
+        .today-btn {
+            background: #1e293b;
+        }
+
+        .today-btn:hover {
+            background: #0f172a;
+        }
+
+        /* ===== SUMMARY GRID ===== */
+        .summary-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+
+        .summary-card {
+            background: linear-gradient(135deg, #0f172a, #1e293b);
+            color: white;
+            padding: 20px;
+            border-radius: 12px;
+            text-align: center;
+        }
+
+        .summary-card.veg {
+            background: linear-gradient(135deg, #166534, #22c55e);
+        }
+
+        .summary-card.nonveg {
+            background: linear-gradient(135deg, #991b1b, #ef4444);
+        }
+
+        .summary-card.total {
+            background: linear-gradient(135deg, #7e22ce, #a855f7);
+        }
+
+        .summary-card .label {
+            font-size: 0.9rem;
+            opacity: 0.9;
+            margin-bottom: 10px;
+            font-weight: 500;
+        }
+
+        .summary-card .value {
+            font-size: 2.5rem;
+            font-weight: 700;
+            line-height: 1;
+        }
+
+        .summary-card .sub-value {
+            font-size: 0.9rem;
+            opacity: 0.8;
+            margin-top: 5px;
+        }
+
+        /* ===== MEAL BREAKDOWN ===== */
+        .breakdown-section {
+            margin-bottom: 30px;
+        }
+
+        .breakdown-section h3 {
+            color: #1e293b;
+            margin-bottom: 15px;
+            font-size: 1.2rem;
+        }
+
+        .breakdown-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
+        }
+
+        .breakdown-card {
+            background: #f8fafc;
+            padding: 15px;
+            border-radius: 10px;
+            text-align: center;
+            border: 1px solid #e2e8f0;
+        }
+
+        .breakdown-card .meal-icon {
+            font-size: 2rem;
+            margin-bottom: 10px;
+        }
+
+        .breakdown-card .meal-type {
+            font-weight: 600;
+            color: #1e293b;
+            margin-bottom: 5px;
+        }
+
+        .breakdown-card .meal-count {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: #f43f5e;
+        }
+
+        .breakdown-card .meal-price {
+            color: #64748b;
+            font-size: 0.9rem;
+            margin-top: 5px;
+        }
+
+        /* ===== TOTAL AMOUNT ===== */
+        .total-amount {
+            background: #b3123c;
+            color: white;
+            padding: 20px;
+            border-radius: 12px;
+            text-align: center;
+            margin-bottom: 30px;
+            font-size: 1.5rem;
+            font-weight: 700;
+        }
+
+        .total-amount small {
+            font-size: 0.9rem;
+            opacity: 0.9;
+            display: block;
+            margin-top: 5px;
+        }
+
+        /* ===== TABLE ===== */
+        .table-container {
+            overflow-x: auto;
+            margin-bottom: 30px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th {
+            background: #0f172a;
+            color: white;
+            padding: 12px;
+            text-align: left;
+            font-weight: 600;
+        }
+
+        td {
+            padding: 12px;
+            border-bottom: 1px solid #e2e8f0;
+        }
+
+        tr:hover td {
+            background: #f8fafc;
+        }
+
+        .meal-badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 600;
+        }
+
+        .meal-badge.breakfast {
+            background: #fef9c3;
+            color: #713f12;
+        }
+
+        .meal-badge.lunch {
+            background: #dbeafe;
+            color: #1e3a8a;
+        }
+
+        .meal-badge.dinner {
+            background: #ede9fe;
+            color: #4c1d95;
+        }
+
+        /* ===== BUTTONS ===== */
+        .btn {
+            display: inline-block;
+            padding: 12px 30px;
+            background: #1e293b;
+            color: white;
+            text-decoration: none;
+            border-radius: 8px;
+            font-weight: 600;
+            transition: opacity 0.2s;
+        }
+
+        .btn:hover {
+            opacity: 0.85;
+        }
+
+        .btn-secondary {
+            background: #f1f5f9;
+            color: #1e293b;
+            border: 1px solid #e2e8f0;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            margin-top: 20px;
+        }
+
+        /* ===== LOADING ===== */
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #64748b;
+        }
+
+        .spinner {
+            width: 40px;
+            height: 40px;
+            border: 4px solid #f1f5f9;
+            border-top: 4px solid #f43f5e;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 15px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* ===== ERROR ===== */
+        .error {
+            text-align: center;
+            padding: 40px;
+            color: #991b1b;
+        }
+
+        /* ===== EMPTY STATE ===== */
+        .empty-state {
+            text-align: center;
+            padding: 40px;
+            color: #64748b;
+        }
+
+        .empty-state svg {
+            width: 60px;
+            height: 60px;
+            margin-bottom: 15px;
+            color: #cbd5e1;
+        }
+
+        /* ===== RESPONSIVE ===== */
+        @media (max-width: 768px) {
+            .header {
+                padding: 14px 16px;
+            }
+
+            .header-content {
+                flex-wrap: wrap;
+            }
+
+            .container {
+                margin-top: 160px;
+            }
+
+            .student-info {
+                flex-direction: column;
+                text-align: center;
+            }
+
+            .summary-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .breakdown-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .button-group {
+                flex-direction: column;
+            }
+
+            .date-filter {
+                flex-direction: column;
+            }
+
+            .date-input {
+                width: 100%;
+            }
+
+            .filter-btn {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- ===== HEADER ===== -->
+    <div class="header">
+        <div class="header-content">
+            <div class="header-logo">
+                <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='42' height='42' viewBox='0 0 24 24' fill='%23f43f5e'%3E%3Cpath d='M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z'/%3E%3C/svg%3E" alt="Hostel Logo">
+            </div>
+            <div class="header-text">
+                <h1 class="header-title">Hostel Mess Management</h1>
+                <nav class="navbar">
+                    <a href="index.html">Home</a>
+                    <a href="register.html">Register</a>
+                    <a href="mess_entry_ui.html">Meals-Tracking</a>
+                    <a href="menu.html">Menu</a>
+                    <a href="feedback.html">Feedback</a>
+                </nav>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== MAIN CONTENT ===== -->
+    <div class="container">
+        <div class="card">
+            <h2>📊 Meal History</h2>
+            <div class="date-info" id="dateDisplay"></div>
+
+            <div id="content"></div>
+        </div>
+    </div>
+
+    <script>
+        // ===== MEAL PRICES - CHANGE THESE VALUES =====
+        const MEAL_PRICES = {
+            breakfast: 25,  // Change breakfast price here
+            lunch: 50,      // Change lunch price here
+            dinner: 40      // Change dinner price here
+        };
+
+        const params = new URLSearchParams(window.location.search);
+        const account = params.get('account_number');
+
+        if (!account) {
+            document.getElementById('content').innerHTML = `
+                <div class="error">
+                    <p>Please provide an account number.</p>
+                    <a href="index.html" class="btn" style="margin-top: 20px;">← Back to Home</a>
+                </div>
+            `;
+        } else {
+            loadMealHistory(account);
+        }
+
+        async function loadMealHistory(accountNumber) {
+            const content = document.getElementById('content');
+            content.innerHTML = `
+                <div class="loading">
+                    <div class="spinner"></div>
+                    <p>Loading meal history...</p>
+                </div>
+            `;
+
+            try {
+                // In a real app, this would fetch from API
+                // const res = await fetch(`api.php?action=search&account_number=${encodeURIComponent(accountNumber)}`);
+                // const data = await res.json();
+                
+                // Simulate API delay
+                await new Promise(resolve => setTimeout(resolve, 1000));
+                
+                const student = {
+                    full_name: 'John Doe',
+                    account_number: accountNumber,
+                    hostel_name: 'Block A',
+                    room_number: '101',
+                    food_preference: 'veg' // Change to 'non-veg' to test
+                };
+                
+                // Get today's date
+                const today = new Date();
+                const yesterday = new Date(today);
+                yesterday.setDate(yesterday.getDate() - 1);
+                
+                // Format dates for display
+                const formatDate = (date) => {
+                    return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
+                };
+                
+                const todayStr = formatDate(today);
+                const yesterdayStr = formatDate(yesterday);
+                
+                // Mock meal history data with proper dates
+                const allMeals = [
+                    // Yesterday's meals
+                    { type: 'breakfast', time: `${yesterdayStr} 08:30:00`, date: yesterdayStr },
+                    { type: 'lunch', time: `${yesterdayStr} 13:15:00`, date: yesterdayStr },
+                    { type: 'dinner', time: `${yesterdayStr} 19:30:00`, date: yesterdayStr },
+                    
+                    // Today's meals
+                    { type: 'breakfast', time: `${todayStr} 08:45:00`, date: todayStr },
+                    { type: 'lunch', time: `${todayStr} 12:30:00`, date: todayStr },
+                    { type: 'dinner', time: `${todayStr} 19:45:00`, date: todayStr }
+                ];
+
+                renderMealHistory(student, allMeals, todayStr);
+            } catch (err) {
+                content.innerHTML = `
+                    <div class="error">
+                        <p>Error: ${err.message}</p>
+                        <a href="index.html" class="btn" style="margin-top: 20px;">← Back to Home</a>
+                    </div>
+                `;
+            }
+        }
+
+        function renderMealHistory(student, allMeals, selectedDate) {
+            // Filter meals for selected date
+            const meals = allMeals.filter(meal => meal.date === selectedDate);
+            
+            // Calculate meal counts for selected date
+            const stats = {
+                breakfast: meals.filter(m => m.type === 'breakfast').length,
+                lunch: meals.filter(m => m.type === 'lunch').length,
+                dinner: meals.filter(m => m.type === 'dinner').length
+            };
+
+            // Calculate totals
+            const totalMeals = stats.breakfast + stats.lunch + stats.dinner;
+            
+            // All meals are veg if student preference is veg, otherwise all are non-veg
+            const isVeg = student.food_preference === 'veg';
+            const vegMeals = isVeg ? totalMeals : 0;
+            const nonVegMeals = isVeg ? 0 : totalMeals;
+
+            // Calculate total amount based on meal prices
+            const totalAmount = meals.reduce((sum, meal) => sum + MEAL_PRICES[meal.type], 0);
+
+            // Format date for display
+            const displayDate = new Date(selectedDate).toLocaleDateString('en-US', {
+                weekday: 'long',
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric'
+            });
+
+            document.getElementById('dateDisplay').textContent = displayDate;
+
+            const content = document.getElementById('content');
+            
+            if (meals.length === 0) {
+                content.innerHTML = `
+                    <div class="student-info">
+                        <div>
+                            <h3>${escapeHtml(student.full_name)}</h3>
+                            <p>Hostel: ${escapeHtml(student.hostel_name || 'N/A')} | Room: ${escapeHtml(student.room_number || 'N/A')}</p>
+                        </div>
+                        <div class="account-badge">
+                            ${escapeHtml(student.account_number)}
+                        </div>
+                    </div>
+
+                    <div class="date-filter">
+                        <input type="date" id="datePicker" class="date-input" value="${selectedDate}">
+                        <button class="filter-btn" onclick="changeDate('${selectedDate}')">View Selected Date</button>
+                        <button class="filter-btn today-btn" onclick="changeDate('${getTodayDate()}')">Today</button>
+                    </div>
+
+                    <div class="empty-state">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                        <h3>No Meals Found</h3>
+                        <p>No meals recorded for ${displayDate}</p>
+                        <a href="mess_entry_ui.html?account_number=${encodeURIComponent(student.account_number)}" class="btn" style="margin-top: 15px;">📝 Record Meal</a>
+                    </div>
+
+                    <div class="button-group">
+                        <a href="index.html?account_number=${encodeURIComponent(student.account_number)}" class="btn">
+                            ← Back to Student
+                        </a>
+                    </div>
+                `;
+                return;
+            }
+
+            content.innerHTML = `
+                <div class="student-info">
+                    <div>
+                        <h3>${escapeHtml(student.full_name)}</h3>
+                        <p>Hostel: ${escapeHtml(student.hostel_name || 'N/A')} | Room: ${escapeHtml(student.room_number || 'N/A')}</p>
+                    </div>
+                    <div class="account-badge">
+                        ${escapeHtml(student.account_number)}
+                    </div>
+                </div>
+
+                <!-- Date Filter -->
+                <div class="date-filter">
+                    <input type="date" id="datePicker" class="date-input" value="${selectedDate}">
+                    <button class="filter-btn" onclick="changeDate('${selectedDate}')">View Selected Date</button>
+                    <button class="filter-btn today-btn" onclick="changeDate('${getTodayDate()}')">Today</button>
+                </div>
+
+                <!-- Summary Cards -->
+                <div class="summary-grid">
+                    <div class="summary-card">
+                        <div class="label">🍳 Breakfasts</div>
+                        <div class="value">${stats.breakfast}</div>
+                        <div class="sub-value">₹${(stats.breakfast * MEAL_PRICES.breakfast).toFixed(2)}</div>
+                    </div>
+                    <div class="summary-card">
+                        <div class="label">🍛 Lunches</div>
+                        <div class="value">${stats.lunch}</div>
+                        <div class="sub-value">₹${(stats.lunch * MEAL_PRICES.lunch).toFixed(2)}</div>
+                    </div>
+                    <div class="summary-card">
+                        <div class="label">🍽️ Dinners</div>
+                        <div class="value">${stats.dinner}</div>
+                        <div class="sub-value">₹${(stats.dinner * MEAL_PRICES.dinner).toFixed(2)}</div>
+                    </div>
+                    <div class="summary-card veg">
+                        <div class="label">🥬 Veg Meals</div>
+                        <div class="value">${vegMeals}</div>
+                        <div class="sub-value">${isVeg ? '100% Veg' : '0% Veg'}</div>
+                    </div>
+                    <div class="summary-card nonveg">
+                        <div class="label">🍖 Non-Veg Meals</div>
+                        <div class="value">${nonVegMeals}</div>
+                        <div class="sub-value">${!isVeg ? '100% Non-Veg' : '0% Non-Veg'}</div>
+                    </div>
+                    <div class="summary-card total">
+                        <div class="label">📊 Total Meals</div>
+                        <div class="value">${totalMeals}</div>
+                        <div class="sub-value">${displayDate}</div>
+                    </div>
+                </div>
+
+                <!-- Meal Breakdown -->
+                <div class="breakdown-section">
+                    <h3>📋 Meal Breakdown</h3>
+                    <div class="breakdown-grid">
+                        <div class="breakdown-card">
+                            <div class="meal-icon">🌅</div>
+                            <div class="meal-type">Breakfast</div>
+                            <div class="meal-count">${stats.breakfast}</div>
+                            <div class="meal-price">₹${MEAL_PRICES.breakfast} each</div>
+                        </div>
+                        <div class="breakdown-card">
+                            <div class="meal-icon">🌤️</div>
+                            <div class="meal-type">Lunch</div>
+                            <div class="meal-count">${stats.lunch}</div>
+                            <div class="meal-price">₹${MEAL_PRICES.lunch} each</div>
+                        </div>
+                        <div class="breakdown-card">
+                            <div class="meal-icon">🌙</div>
+                            <div class="meal-type">Dinner</div>
+                            <div class="meal-count">${stats.dinner}</div>
+                            <div class="meal-price">₹${MEAL_PRICES.dinner} each</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Total Amount -->
+                <div class="total-amount">
+                    Total Amount for ${displayDate}: ₹${totalAmount.toFixed(2)}
+                    <small>(${stats.breakfast} Breakfast × ₹${MEAL_PRICES.breakfast} + ${stats.lunch} Lunch × ₹${MEAL_PRICES.lunch} + ${stats.dinner} Dinner × ₹${MEAL_PRICES.dinner})</small>
+                </div>
+
+                <!-- Meal Records for Selected Date -->
+                <h3 style="margin-bottom: 15px;">Meal Records for ${displayDate}</h3>
+                
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>#</th>
+                                <th>Meal Type</th>
+                                <th>Time</th>
+                                <th>Amount</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${meals.map((meal, index) => {
+                                const time = new Date(meal.time).toLocaleTimeString('en-US', {
+                                    hour: '2-digit',
+                                    minute: '2-digit',
+                                    second: '2-digit',
+                                    hour12: true
+                                });
+                                return `
+                                    <tr>
+                                        <td>${index + 1}</td>
+                                        <td>
+                                            <span class="meal-badge ${meal.type}">
+                                                ${meal.type.charAt(0).toUpperCase() + meal.type.slice(1)}
+                                            </span>
+                                        </td>
+                                        <td>${time}</td>
+                                        <td>₹${MEAL_PRICES[meal.type].toFixed(2)}</td>
+                                    </tr>
+                                `;
+                            }).join('')}
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Action Buttons -->
+                <div class="button-group">
+                    <a href="index.html?account_number=${encodeURIComponent(student.account_number)}" class="btn">
+                        ← Back to Student
+                    </a>
+                    <a href="mess_entry_ui.html?account_number=${encodeURIComponent(student.account_number)}" class="btn btn-secondary">
+                        📝 Record New Meal
+                    </a>
+                </div>
+            `;
+
+            // Add event listener for date picker
+            document.getElementById('datePicker').addEventListener('change', function(e) {
+                changeDate(e.target.value);
+            });
+        }
+
+        // Helper function to get today's date
+        function getTodayDate() {
+            const today = new Date();
+            return `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
+        }
+
+        // Change date function
+        function changeDate(newDate) {
+            const params = new URLSearchParams(window.location.search);
+            const account = params.get('account_number');
+            window.location.href = `meal_history.html?account_number=${account}&date=${newDate}`;
+        }
+
+        // Check for date in URL on page load
+        window.addEventListener('load', function() {
+            const dateParam = new URLSearchParams(window.location.search).get('date');
+            if (dateParam && account) {
+                // Date is already handled in loadMealHistory
+            }
+        });
+
+        function escapeHtml(str) {
+            if (!str) return '';
+            return String(str)
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#039;');
+        }
+    </script>
+</body>
+</html>

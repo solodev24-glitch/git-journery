@@ -1,0 +1,599 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Register Student — Hostel Mess</title>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=DM+Sans:wght@400;500;600&display=swap"
+    rel="stylesheet" />
+  <style>
+    :root {
+      --cream: #F5ECD7;
+      --red: #F02F34;
+      --deep-red: #bd1e51;
+      --dark-purple: #490b3d;
+      --blue: #00abe1;
+      --white: #ffffff;
+      --error: #ff4444;
+      --success: #00c97f;
+    }
+
+    *,
+    *::before,
+    *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'DM Sans', sans-serif;
+      background: linear-gradient(135deg, var(--dark-purple) 0%, var(--deep-red) 60%, var(--red) 100%);
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+      padding: 40px 16px 60px;
+    }
+
+    .wrapper {
+      width: 100%;
+      max-width: 700px;
+    }
+
+    .header {
+      background: rgba(255, 255, 255, 0.08);
+      backdrop-filter: blur(14px);
+      border: 1px solid rgba(255, 255, 255, 0.18);
+      border-radius: 20px 20px 0 0;
+      padding: 32px 36px 28px;
+      color: var(--white);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .header::before {
+      content: '';
+      position: absolute;
+      top: -40px;
+      right: -40px;
+      width: 180px;
+      height: 180px;
+      background: radial-gradient(circle, rgba(240, 47, 52, 0.4), transparent 70%);
+      border-radius: 50%;
+    }
+
+    .header-top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+
+    .header h1 {
+      font-family: 'Playfair Display', serif;
+      font-size: clamp(22px, 4vw, 30px);
+      letter-spacing: -0.5px;
+    }
+
+    .header p {
+      font-size: 14px;
+      opacity: 0.75;
+      margin-top: 4px;
+    }
+
+    .btn-back {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 8px 18px;
+      background: rgba(255, 255, 255, 0.15);
+      border: 1px solid rgba(255, 255, 255, 0.3);
+      color: white;
+      text-decoration: none;
+      border-radius: 50px;
+      font-size: 13px;
+      font-weight: 600;
+      transition: background 0.25s, transform 0.2s;
+    }
+
+    .btn-back:hover {
+      background: var(--blue);
+      transform: translateX(-2px);
+    }
+
+    .card {
+      background: var(--cream);
+      padding: 36px;
+      border-radius: 0 0 20px 20px;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.35);
+    }
+
+    .alert {
+      background: #fff0f0;
+      border-left: 5px solid var(--error);
+      padding: 14px 16px;
+      border-radius: 8px;
+      margin-bottom: 24px;
+      font-size: 14px;
+      color: #7a0000;
+    }
+
+    .alert ul {
+      padding-left: 18px;
+    }
+
+    .alert-success {
+      background: #f0fff7;
+      border-left-color: var(--success);
+      color: #005f38;
+    }
+
+    .form-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 18px;
+    }
+
+    .form-grid .full {
+      grid-column: 1 / -1;
+    }
+
+    .form-group label {
+      display: block;
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--dark-purple);
+      margin-bottom: 6px;
+      letter-spacing: 0.3px;
+    }
+
+    .form-group label .req {
+      color: var(--red);
+      margin-left: 2px;
+    }
+
+    .form-group input,
+    .form-group select {
+      width: 100%;
+      padding: 11px 14px;
+      border: 2px solid #ddd0c5;
+      border-radius: 10px;
+      background: white;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 14px;
+      color: #2a1a2e;
+      transition: border-color 0.25s, box-shadow 0.25s;
+    }
+
+    .form-group input:focus,
+    .form-group select:focus {
+      outline: none;
+      border-color: var(--blue);
+      box-shadow: 0 0 0 4px rgba(0, 171, 225, 0.15);
+    }
+
+    .form-group input.invalid {
+      border-color: var(--error);
+    }
+
+    .form-group .field-error {
+      font-size: 12px;
+      color: var(--error);
+      margin-top: 4px;
+      display: none;
+    }
+
+    .form-group input.invalid~.field-error {
+      display: block;
+    }
+
+    .photo-upload {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+
+    .photo-avatar {
+      width: 72px;
+      height: 72px;
+      border-radius: 50%;
+      object-fit: cover;
+      border: 3px solid var(--deep-red);
+      display: none;
+    }
+
+    .photo-placeholder {
+      width: 72px;
+      height: 72px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--deep-red), var(--dark-purple));
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 28px;
+      flex-shrink: 0;
+    }
+
+    .photo-right label {
+      display: inline-block;
+      padding: 9px 18px;
+      background: var(--dark-purple);
+      color: white;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 13px;
+      font-weight: 600;
+      transition: background 0.2s;
+    }
+
+    .photo-right label:hover {
+      background: var(--blue);
+    }
+
+    .photo-right input[type="file"] {
+      display: none;
+    }
+
+    .photo-hint {
+      font-size: 12px;
+      color: #7a6060;
+      margin-top: 4px;
+    }
+
+    .section-divider {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin: 28px 0 20px;
+    }
+
+    .section-divider span {
+      font-size: 12px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: var(--deep-red);
+      white-space: nowrap;
+    }
+
+    .section-divider::before,
+    .section-divider::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: #d4bca8;
+    }
+
+    .form-actions {
+      display: flex;
+      gap: 12px;
+      margin-top: 28px;
+    }
+
+    .btn {
+      flex: 1;
+      padding: 13px;
+      border: none;
+      border-radius: 10px;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 15px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: transform 0.15s, box-shadow 0.2s, background 0.2s;
+    }
+
+    .btn:active {
+      transform: scale(0.98);
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, var(--red), var(--deep-red));
+      color: white;
+      box-shadow: 0 4px 14px rgba(189, 30, 81, 0.4);
+    }
+
+    .btn-primary:hover {
+      box-shadow: 0 6px 20px rgba(189, 30, 81, 0.55);
+    }
+
+    .btn-primary:disabled {
+      opacity: 0.7;
+      cursor: not-allowed;
+    }
+
+    .btn-secondary {
+      background: var(--dark-purple);
+      color: white;
+      text-decoration: none;
+      text-align: center;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .btn-secondary:hover {
+      background: #6b1060;
+    }
+
+    .btn-primary .spinner {
+      display: none;
+      width: 16px;
+      height: 16px;
+      border: 2px solid rgba(255, 255, 255, 0.4);
+      border-top-color: white;
+      border-radius: 50%;
+      animation: spin 0.7s linear infinite;
+      margin-right: 8px;
+      vertical-align: middle;
+    }
+
+    .btn-primary.loading .spinner {
+      display: inline-block;
+    }
+
+    .btn-primary.loading .btn-text {
+      opacity: 0.7;
+    }
+
+    @keyframes spin {
+      to {
+        transform: rotate(360deg);
+      }
+    }
+
+    @media (max-width: 520px) {
+      .form-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .form-grid .full {
+        grid-column: auto;
+      }
+
+      .card,
+      .header {
+        padding: 24px 20px;
+      }
+
+      .form-actions {
+        flex-direction: column;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="wrapper">
+
+    <div class="header">
+      <div class="header-top">
+        <div>
+          <h1>🍽 Register Student</h1>
+          <p>Hostel Mess Management System</p>
+        </div>
+        <a href="index.html" class="btn-back">← Back to Home</a>
+      </div>
+    </div>
+
+    <div class="card">
+
+      <div id="alertBox" style="display:none;"></div>
+
+      <form id="registerForm" novalidate>
+
+        <div class="section-divider"><span>Profile Photo</span></div>
+        <div class="photo-upload">
+          <div class="photo-placeholder" id="photoPlaceholder">👤</div>
+          <img id="photoPreview" class="photo-avatar" src="#" alt="Preview" />
+          <div class="photo-right">
+            <label for="photo">📷 Upload Photo</label>
+            <input type="file" id="photo" name="photo" accept="image/png,image/jpeg,image/webp" />
+            <p class="photo-hint">PNG, JPG, or WEBP · Max 5 MB</p>
+          </div>
+        </div>
+
+        <div class="section-divider"><span>Student Identity</span></div>
+        <div class="form-grid">
+          <div class="form-group full">
+            <label for="account_number">Account Number <span class="req">*</span></label>
+            <input type="text" id="account_number" name="account_number" placeholder="e.g. 541" required />
+            <div class="field-error">Account number is required.</div>
+          </div>
+          <div class="form-group full">
+            <label for="full_name">Full Name <span class="req">*</span></label>
+            <input type="text" id="full_name" name="full_name" placeholder="Enter full name" required />
+            <div class="field-error">Full name is required.</div>
+          </div>
+          <div class="form-group">
+            <label for="email">Email</label>
+            <input type="email" id="email" name="email" placeholder="student@example.com" />
+            <div class="field-error">Enter a valid email address.</div>
+          </div>
+          <div class="form-group">
+            <label for="phone">Phone</label>
+            <input type="tel" id="phone" name="phone" placeholder="+91 98765 43210" />
+            <div class="field-error">Enter a valid phone number.</div>
+          </div>
+        </div>
+
+        <div class="section-divider"><span>Hostel Details</span></div>
+        <div class="form-grid">
+          <div class="form-group">
+            <label for="hostel_name">Hostel Name <span class="req">*</span></label>
+            <input type="text" id="hostel_name" name="hostel_name" placeholder="e.g. Block A" required />
+            <div class="field-error">Hostel name is required.</div>
+          </div>
+          <div class="form-group">
+            <label for="room_number">Room Number <span class="req">*</span></label>
+            <input type="text" id="room_number" name="room_number" placeholder="e.g. 204" required />
+            <div class="field-error">Room number is required.</div>
+          </div>
+          <div class="form-group full">
+            <label for="food_preference">Food Preference</label>
+            <select id="food_preference" name="food_preference">
+              <option value="veg">🥦 Vegetarian</option>
+              <option value="non-veg">🍗 Non-Vegetarian</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="form-actions">
+          <button type="submit" class="btn btn-primary" id="submitBtn">
+            <span class="spinner"></span>
+            <span class="btn-text">✅ Register Student</span>
+          </button>
+          <a href="index.html" class="btn btn-secondary">Cancel</a>
+        </div>
+
+      </form>
+    </div>
+  </div>
+
+  <script>
+    (function () {
+      const API = 'api.php';
+
+      const form = document.getElementById('registerForm');
+      const submitBtn = document.getElementById('submitBtn');
+      const alertBox = document.getElementById('alertBox');
+      const preview = document.getElementById('photoPreview');
+      const placeholder = document.getElementById('photoPlaceholder');
+      const photoInput = document.getElementById('photo');
+
+      /* ── Photo preview ── */
+      photoInput.addEventListener('change', function () {
+        const file = this.files[0];
+        if (!file) { 
+          preview.style.display = 'none'; 
+          placeholder.style.display = 'flex'; 
+          return; 
+        }
+        if (!['image/png', 'image/jpeg', 'image/webp'].includes(file.type)) {
+          showAlert(['Only PNG, JPG, or WEBP images are allowed.'], false);
+          this.value = '';
+          return;
+        }
+        const reader = new FileReader();
+        reader.onload = e => {
+          preview.src = e.target.result;
+          preview.style.display = 'block';
+          placeholder.style.display = 'none';
+        };
+        reader.readAsDataURL(file);
+      });
+
+      /* ── Validation helpers ── */
+      function setInvalid(input, msg) {
+        input.classList.add('invalid');
+        const err = input.parentElement.querySelector('.field-error');
+        if (err) { err.textContent = msg; err.style.display = 'block'; }
+      }
+
+      function clearInvalid(input) {
+        input.classList.remove('invalid');
+        const err = input.parentElement.querySelector('.field-error');
+        if (err) err.style.display = 'none';
+      }
+
+      ['account_number', 'full_name', 'hostel_name', 'room_number', 'email', 'phone'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.addEventListener('input', () => clearInvalid(el));
+      });
+
+      /* ── Alert box ── */
+      function showAlert(messages, isSuccess) {
+        alertBox.style.display = 'block';
+        alertBox.className = 'alert' + (isSuccess ? ' alert-success' : '');
+        if (isSuccess) {
+          alertBox.innerHTML = '<strong>✅ ' + messages[0] + '</strong>';
+        } else {
+          alertBox.innerHTML = '<strong>Please fix the following:</strong><ul>' +
+            messages.map(m => '<li>' + m + '</li>').join('') + '</ul>';
+        }
+        alertBox.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
+
+      /* ── Form submit ── */
+      form.addEventListener('submit', async function (e) {
+        e.preventDefault();
+        alertBox.style.display = 'none';
+
+        const account = document.getElementById('account_number');
+        const fullname = document.getElementById('full_name');
+        const email = document.getElementById('email');
+        const phone = document.getElementById('phone');
+        const hostel = document.getElementById('hostel_name');
+        const room = document.getElementById('room_number');
+
+        let valid = true;
+        if (!account.value.trim()) { setInvalid(account, 'Account number is required.'); valid = false; }
+        if (!fullname.value.trim()) { setInvalid(fullname, 'Full name is required.'); valid = false; }
+        if (!hostel.value.trim()) { setInvalid(hostel, 'Hostel name is required.'); valid = false; }
+        if (!room.value.trim()) { setInvalid(room, 'Room number is required.'); valid = false; }
+        if (email.value && !/^\S+@\S+\.\S+$/.test(email.value)) {
+          setInvalid(email, 'Enter a valid email address.'); valid = false;
+        }
+        if (phone.value && !/^[0-9+\-\s()]{6,20}$/.test(phone.value)) {
+          setInvalid(phone, 'Enter a valid phone number.'); valid = false;
+        }
+        if (!valid) return;
+
+        submitBtn.classList.add('loading');
+        submitBtn.disabled = true;
+
+        try {
+          const fd = new FormData(form);
+          if (photoInput.files[0]) fd.set('photo', photoInput.files[0]);
+
+          const res = await fetch(API + '?action=register_student', {
+            method: 'POST',
+            body: fd
+          });
+
+          const raw = await res.text();
+
+          let data;
+          try {
+            data = JSON.parse(raw);
+          } catch (_) {
+            const cleaned = raw.replace(/<[^>]*>/g, '').trim().substring(0, 400);
+            showAlert([
+              'The server did not return valid JSON.',
+              cleaned ? 'Server said: ' + cleaned : 'Response was completely empty.',
+              'Check: Is api.php in the same folder? Is PHP running? Is MySQL running?'
+            ], false);
+            return;
+          }
+
+          if (data.success) {
+            showAlert(['Student registered successfully! Redirecting…'], true);
+            setTimeout(function () {
+              window.location.href = 'index.html?account_number=' + encodeURIComponent(account.value.trim());
+            }, 1500);
+          } else {
+            const msgs = (Array.isArray(data.errors) && data.errors.length)
+              ? data.errors
+              : ['An unknown error occurred. Check the browser console.'];
+            showAlert(msgs, false);
+          }
+
+        } catch (err) {
+          showAlert([
+            'Cannot reach the server: ' + err.message,
+            'Make sure you are opening this page through a web server (http://localhost/...)'
+          ], false);
+        } finally {
+          submitBtn.classList.remove('loading');
+          submitBtn.disabled = false;
+        }
+      });
+    })();
+  </script>
+</body>
+
+</html>

@@ -1,0 +1,890 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Feedback - Hostel Mess</title>
+    
+    <!-- STRICT LOGIN PROTECTION -->
+    <script>
+        (function() {
+            if (window.performance && window.performance.navigation.type === window.performance.navigation.TYPE_BACK_FORWARD) {
+                window.location.replace('login.html');
+                return;
+            }
+        })();
+    </script>
+
+    <script>
+        (function () {
+            document.documentElement.style.visibility = 'hidden';
+            const studentLoggedIn = sessionStorage.getItem('studentLoggedIn') === 'true' || localStorage.getItem('studentLoggedIn') === 'true';
+            const staffLoggedIn = sessionStorage.getItem('staffLoggedIn') === 'true' || localStorage.getItem('staffLoggedIn') === 'true';
+
+            if (staffLoggedIn) {
+                window.location.replace('index.html?staff=true');
+                return;
+            }
+
+            if (!studentLoggedIn) {
+                window.location.replace('login.html');
+                return;
+            }
+
+            document.documentElement.style.visibility = 'visible';
+        })();
+    </script>
+
+    <!-- BACK BUTTON PREVENTION -->
+    <script>
+        (function() {
+            window.addEventListener('pageshow', function(event) {
+                if (event.persisted) {
+                    const studentLoggedIn = sessionStorage.getItem('studentLoggedIn') === 'true' || localStorage.getItem('studentLoggedIn') === 'true';
+                    const staffLoggedIn = sessionStorage.getItem('staffLoggedIn') === 'true' || localStorage.getItem('staffLoggedIn') === 'true';
+                    
+                    if (!studentLoggedIn && !staffLoggedIn) {
+                        window.location.replace('login.html');
+                    }
+                }
+            });
+
+            history.pushState(null, null, location.href);
+            window.onpopstate = function() {
+                history.pushState(null, null, location.href);
+            };
+        })();
+    </script>
+
+    <!-- PREVENT PAGE CACHING -->
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate, max-age=0">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #f1f5f9;
+            color: #1e293b;
+            padding: 20px;
+        }
+
+        .header {
+            background: #1a1a1a;
+            color: white;
+            padding: 15px 30px;
+            margin-bottom: 30px;
+            border-radius: 8px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .header h1 {
+            color: #ff4444;
+            margin-bottom: 10px;
+            font-size: 24px;
+        }
+
+        .nav {
+            display: flex;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+
+        .nav a {
+            color: #ddd;
+            text-decoration: none;
+            padding: 5px 10px;
+            border-radius: 4px;
+            transition: all 0.3s;
+            font-size: 14px;
+        }
+
+        .nav a:hover {
+            color: #ff4444;
+            background: rgba(255,255,255,0.1);
+        }
+
+        .nav a.active {
+            color: #ff4444;
+            background: rgba(255,68,68,0.1);
+            font-weight: bold;
+        }
+
+        .logout-btn {
+            background: #dc2626;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.2s;
+        }
+
+        .logout-btn:hover {
+            background: #b91c1c;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(220, 38, 38, 0.3);
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+
+        .card {
+            background: white;
+            border-radius: 10px;
+            padding: 30px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .card h2 {
+            color: #333;
+            margin-bottom: 10px;
+            text-align: center;
+            font-size: 28px;
+        }
+
+        .subtitle {
+            text-align: center;
+            color: #666;
+            margin-bottom: 30px;
+            font-size: 16px;
+        }
+
+        .view-all-link {
+            text-align: right;
+            margin-bottom: 20px;
+        }
+
+        .view-all-link a {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 20px;
+            background: #28a745;
+            color: white;
+            text-decoration: none;
+            border-radius: 6px;
+            font-size: 14px;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+
+        .view-all-link a:hover {
+            background: #218838;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(40,167,69,0.3);
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #333;
+            font-size: 14px;
+        }
+
+        .form-group input,
+        .form-group textarea,
+        .form-group select {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e2e8f0;
+            border-radius: 8px;
+            font-size: 14px;
+            transition: all 0.3s;
+            font-family: inherit;
+        }
+
+        .form-group input:focus,
+        .form-group textarea:focus,
+        .form-group select:focus {
+            border-color: #ff4444;
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(255,68,68,0.1);
+        }
+
+        .form-group input[readonly] {
+            background: #f8f9fa;
+            cursor: not-allowed;
+            font-weight: 500;
+        }
+
+        .required {
+            color: #ff4444;
+        }
+
+        .rating-section {
+            background: #f8f9fa;
+            padding: 25px;
+            border-radius: 8px;
+            margin-bottom: 30px;
+            border: 1px solid #e9ecef;
+        }
+
+        .rating-section h3 {
+            margin-bottom: 20px;
+            color: #333;
+            font-size: 18px;
+            text-align: center;
+        }
+
+        .rating-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 30px;
+        }
+
+        .rating-item {
+            text-align: center;
+        }
+
+        .rating-item label {
+            display: block;
+            margin-bottom: 15px;
+            font-weight: 600;
+            color: #333;
+            font-size: 15px;
+        }
+
+        .stars {
+            display: flex;
+            gap: 8px;
+            justify-content: center;
+            margin-bottom: 10px;
+        }
+
+        .star {
+            font-size: 35px;
+            color: #ddd;
+            cursor: pointer;
+            transition: all 0.2s;
+            user-select: none;
+        }
+
+        .star:hover {
+            transform: scale(1.2);
+            color: #ffd700;
+        }
+
+        .star.active {
+            color: #ffd700;
+        }
+
+        .rating-text {
+            color: #666;
+            font-size: 13px;
+            font-weight: 500;
+            display: block;
+        }
+
+        .staff-section {
+            margin: 30px 0;
+        }
+
+        .staff-section h3 {
+            margin-bottom: 20px;
+            color: #333;
+            font-size: 18px;
+        }
+
+        .staff-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 20px;
+        }
+
+        .staff-card {
+            background: #f8f9fa;
+            border: 1px solid #e9ecef;
+            border-radius: 8px;
+            padding: 20px;
+            transition: all 0.3s;
+        }
+
+        .staff-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            border-color: #ff4444;
+        }
+
+        .staff-card h4 {
+            color: #333;
+            margin-bottom: 5px;
+            font-size: 18px;
+        }
+
+        .staff-card .role {
+            color: #666;
+            font-size: 14px;
+            margin-bottom: 5px;
+        }
+
+        .staff-card .phone {
+            color: #999;
+            font-size: 13px;
+            margin-bottom: 15px;
+        }
+
+        .food-badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: bold;
+            margin-bottom: 15px;
+        }
+
+        .food-badge.veg {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .food-badge.nonveg {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        .staff-rating {
+            margin-top: 15px;
+            padding-top: 15px;
+            border-top: 1px solid #e9ecef;
+        }
+
+        .staff-rating p {
+            margin-bottom: 10px;
+            font-weight: 500;
+            color: #333;
+            font-size: 14px;
+        }
+
+        .form-actions {
+            display: flex;
+            gap: 15px;
+            margin-top: 30px;
+        }
+
+        .btn {
+            flex: 1;
+            padding: 14px;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            text-decoration: none;
+            text-align: center;
+            transition: all 0.3s;
+        }
+
+        .btn-primary {
+            background: #ff4444;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #cc0000;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(255,68,68,0.3);
+        }
+
+        .btn-secondary {
+            background: #6c757d;
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            background: #545b62;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(108,117,125,0.3);
+        }
+
+        .alert {
+            padding: 15px 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            display: none;
+            align-items: center;
+            gap: 10px;
+            font-size: 14px;
+            font-weight: 500;
+        }
+
+        .alert.show {
+            display: flex;
+            animation: slideIn 0.3s ease;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .alert-success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .alert-error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        .empty-staff {
+            grid-column: 1/-1;
+            text-align: center;
+            padding: 40px;
+            color: #64748b;
+            background: #f8f9fa;
+            border-radius: 8px;
+            border: 1px dashed #e9ecef;
+        }
+
+        .empty-staff svg {
+            width: 60px;
+            height: 60px;
+            margin-bottom: 15px;
+            color: #cbd5e1;
+        }
+
+        .empty-staff h3 {
+            color: #1e293b;
+            margin-bottom: 8px;
+            font-size: 1.2rem;
+        }
+
+        .empty-staff p {
+            margin-bottom: 15px;
+        }
+
+        @media (max-width: 768px) {
+            body {
+                padding: 10px;
+            }
+
+            .header {
+                padding: 15px;
+                flex-direction: column;
+                gap: 10px;
+            }
+
+            .nav {
+                gap: 10px;
+                justify-content: center;
+            }
+
+            .rating-grid {
+                grid-template-columns: 1fr;
+                gap: 20px;
+            }
+
+            .staff-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .form-actions {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div>
+            <h1>🏨 Hostel Mess Management System</h1>
+            <div class="nav">
+                <a href="menu.html">📋 Menu</a>
+                <a href="feedback.html" class="active">💬 Give Feedback</a>
+            </div>
+        </div>
+        <button class="logout-btn" onclick="logout()">🚪 Logout</button>
+    </div>
+
+    <div class="container">
+        <div class="card">
+            <div class="view-all-link">
+                <a href="feedback_list.html">
+                    📊 View All Feedback →
+                </a>
+            </div>
+
+            <h2>💬 Give Your Feedback</h2>
+            <div class="subtitle">Rate the performance of our staff members</div>
+
+            <div id="alertBox" class="alert"></div>
+
+            <form id="feedbackForm">
+                <div class="form-group">
+                    <label>Your Account Number <span class="required">*</span></label>
+                    <input type="text" id="accountNumber" readonly style="background: #f8f9fa;">
+                </div>
+
+                <div class="rating-section">
+                    <h3>📊 Overall Mess Ratings</h3>
+                    <div class="rating-grid">
+                        <div class="rating-item">
+                            <label>Food Quality</label>
+                            <div class="stars" id="qualityStars">
+                                <span class="star" data-rating="1" onclick="setRating('quality', 1)">★</span>
+                                <span class="star" data-rating="2" onclick="setRating('quality', 2)">★</span>
+                                <span class="star" data-rating="3" onclick="setRating('quality', 3)">★</span>
+                                <span class="star" data-rating="4" onclick="setRating('quality', 4)">★</span>
+                                <span class="star" data-rating="5" onclick="setRating('quality', 5)">★</span>
+                            </div>
+                            <input type="hidden" id="quality" value="0">
+                            <span class="rating-text" id="qualityText">Not rated</span>
+                        </div>
+
+                        <div class="rating-item">
+                            <label>Hygiene & Cleanliness</label>
+                            <div class="stars" id="hygieneStars">
+                                <span class="star" data-rating="1" onclick="setRating('hygiene', 1)">★</span>
+                                <span class="star" data-rating="2" onclick="setRating('hygiene', 2)">★</span>
+                                <span class="star" data-rating="3" onclick="setRating('hygiene', 3)">★</span>
+                                <span class="star" data-rating="4" onclick="setRating('hygiene', 4)">★</span>
+                                <span class="star" data-rating="5" onclick="setRating('hygiene', 5)">★</span>
+                            </div>
+                            <input type="hidden" id="hygiene" value="0">
+                            <span class="rating-text" id="hygieneText">Not rated</span>
+                        </div>
+
+                        <div class="rating-item">
+                            <label>Service & Staff Behavior</label>
+                            <div class="stars" id="serviceStars">
+                                <span class="star" data-rating="1" onclick="setRating('service', 1)">★</span>
+                                <span class="star" data-rating="2" onclick="setRating('service', 2)">★</span>
+                                <span class="star" data-rating="3" onclick="setRating('service', 3)">★</span>
+                                <span class="star" data-rating="4" onclick="setRating('service', 4)">★</span>
+                                <span class="star" data-rating="5" onclick="setRating('service', 5)">★</span>
+                            </div>
+                            <input type="hidden" id="service" value="0">
+                            <span class="rating-text" id="serviceText">Not rated</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="staff-section">
+                    <h3>👥 Rate Individual Staff Members <button type="button" onclick="forceReloadStaff()" style="margin-left: 10px; padding: 5px 12px; background: #28a745; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 12px;">🔄 Refresh</button></h3>
+                    <div id="staffList" class="staff-grid"></div>
+                </div>
+
+                <div class="form-group">
+                    <label for="comments">Additional Comments (Optional)</label>
+                    <textarea id="comments" rows="4" placeholder="Any additional feedback or suggestions..."></textarea>
+                </div>
+
+                <div class="form-actions">
+                    <button type="submit" class="btn btn-primary">📤 Submit Feedback</button>
+                    <a href="menu.html" class="btn btn-secondary">← Back to Menu</a>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        window.addEventListener('load', function() {
+            const account = sessionStorage.getItem('studentAccount') || localStorage.getItem('studentAccount');
+            
+            if (account) {
+                document.getElementById('accountNumber').value = account;
+                loadStaffMembers();
+            } else {
+                window.location.replace('login.html');
+            }
+        });
+
+        function logout() {
+            if (confirm('Are you sure you want to logout?')) {
+                sessionStorage.clear();
+                localStorage.clear();
+                window.location.replace('login.html');
+            }
+        }
+
+        async function loadStaffMembers() {
+            console.log('Loading staff members from database...');
+            
+            // Save current ratings before reloading
+            const savedRatings = {};
+            document.querySelectorAll('.staff-card').forEach(card => {
+                const staffId = card.dataset.staffId;
+                const ratingInput = document.getElementById(`staff-rating-${staffId}`);
+                if (ratingInput && ratingInput.value > 0) {
+                    savedRatings[staffId] = ratingInput.value;
+                }
+            });
+            
+            try {
+                const response = await fetch('staff_api.php?action=get_staff');
+                const result = await response.json();
+                
+                if (result.success) {
+                    const activeStaff = result.data;
+                    console.log('Loaded staff from database:', activeStaff);
+                    
+                    window.staffMembers = activeStaff;
+                    
+                    if (activeStaff.length === 0) {
+                        showEmptyStaffState();
+                    } else {
+                        renderStaffCards(activeStaff);
+                        
+                        // Restore saved ratings
+                        Object.keys(savedRatings).forEach(staffId => {
+                            rateStaff(staffId, parseInt(savedRatings[staffId]));
+                        });
+                    }
+                } else {
+                    console.error('Error loading staff:', result.message);
+                    showEmptyStaffState();
+                }
+            } catch (error) {
+                console.error('Error loading staff:', error);
+                showEmptyStaffState();
+            }
+        }
+
+        function showEmptyStaffState() {
+            const staffList = document.getElementById('staffList');
+            staffList.innerHTML = `
+                <div class="empty-staff">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
+                    </svg>
+                    <h3>No Staff Members Available</h3>
+                    <p>There are no staff members registered in the system yet.</p>
+                    <p>Please check back later or contact the administrator.</p>
+                    <button onclick="forceReloadStaff()" style="margin-top: 15px; padding: 10px 20px; background: #ff4444; color: white; border: none; border-radius: 6px; cursor: pointer;">🔄 Refresh Staff List</button>
+                </div>
+            `;
+        }
+
+        function setRating(type, rating) {
+            const stars = document.getElementById(type + 'Stars').querySelectorAll('.star');
+            const hiddenInput = document.getElementById(type);
+            const textSpan = document.getElementById(type + 'Text');
+            
+            hiddenInput.value = rating;
+            
+            stars.forEach((star, index) => {
+                if (index < rating) {
+                    star.classList.add('active');
+                } else {
+                    star.classList.remove('active');
+                }
+            });
+            
+            const ratings = ['Poor', 'Fair', 'Good', 'Very Good', 'Excellent'];
+            textSpan.textContent = ratings[rating - 1] + ' (' + rating + '/5)';
+            
+            console.log('Rating set:', type, rating);
+        }
+
+        function rateStaff(staffId, rating) {
+            console.log('rateStaff called:', staffId, rating);
+            
+            const card = document.querySelector(`[data-staff-id="${staffId}"]`);
+            if (!card) {
+                console.log('Card not found for staffId:', staffId);
+                return;
+            }
+            
+            const stars = card.querySelectorAll('.staff-rating .star');
+            const hiddenInput = document.getElementById(`staff-rating-${staffId}`);
+            const textSpan = document.getElementById(`staff-rating-text-${staffId}`);
+            
+            if (!hiddenInput || !textSpan) {
+                console.log('Elements not found for staffId:', staffId);
+                return;
+            }
+            
+            hiddenInput.value = rating;
+            
+            stars.forEach((star, index) => {
+                if (index < rating) {
+                    star.classList.add('active');
+                } else {
+                    star.classList.remove('active');
+                }
+            });
+            
+            const ratings = ['Poor', 'Fair', 'Good', 'Very Good', 'Excellent'];
+            textSpan.textContent = ratings[rating - 1] + ' (' + rating + '/5)';
+            
+            console.log('Staff rating set:', staffId, rating);
+        }
+
+        function renderStaffCards(staffMembers) {
+            const staffList = document.getElementById('staffList');
+            
+            staffList.innerHTML = staffMembers.map(staff => {
+                return `
+                    <div class="staff-card" data-staff-id="${staff.id}">
+                        <h4>${escapeHtml(staff.name)}</h4>
+                        <div class="role">${escapeHtml(staff.role)}</div>
+                        <div class="phone">📞 ${escapeHtml(staff.phone || 'N/A')}</div>
+                        <span class="food-badge ${staff.foodPreference === 'veg' ? 'veg' : 'nonveg'}">
+                            ${staff.foodPreference === 'veg' ? '🥦 Vegetarian' : '🍗 Non-Vegetarian'}
+                        </span>
+                        
+                        <div class="staff-rating">
+                            <p>Rate this staff member:</p>
+                            <div class="stars">
+                                <span class="star" onclick="rateStaff(${staff.id}, 1)">★</span>
+                                <span class="star" onclick="rateStaff(${staff.id}, 2)">★</span>
+                                <span class="star" onclick="rateStaff(${staff.id}, 3)">★</span>
+                                <span class="star" onclick="rateStaff(${staff.id}, 4)">★</span>
+                                <span class="star" onclick="rateStaff(${staff.id}, 5)">★</span>
+                            </div>
+                            <input type="hidden" id="staff-rating-${staff.id}" value="0">
+                            <span class="rating-text" id="staff-rating-text-${staff.id}">Not rated</span>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+            
+            console.log('Rendered staff cards:', staffMembers.length);
+        }
+
+        document.getElementById('feedbackForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+
+            const account = document.getElementById('accountNumber').value.trim();
+            const quality = parseInt(document.getElementById('quality').value);
+            const hygiene = parseInt(document.getElementById('hygiene').value);
+            const service = parseInt(document.getElementById('service').value);
+            const comments = document.getElementById('comments').value.trim();
+
+            if (quality === 0 || hygiene === 0 || service === 0) {
+                showAlert('Please rate Food Quality, Hygiene, and Service', false);
+                return;
+            }
+
+            const ratings = [];
+            let hasStaffRatings = false;
+            
+            document.querySelectorAll('.staff-card').forEach(card => {
+                const staffId = card.dataset.staffId;
+                const rating = parseInt(document.getElementById(`staff-rating-${staffId}`).value);
+                
+                if (rating > 0) {
+                    hasStaffRatings = true;
+                    const staff = window.staffMembers.find(s => s.id == staffId);
+                    if (staff) {
+                        ratings.push({
+                            staffId: staffId,
+                            staffName: staff.name,
+                            staffRole: staff.role,
+                            rating: rating
+                        });
+                    }
+                }
+            });
+
+            if (!hasStaffRatings) {
+                showAlert('Please rate at least one staff member', false);
+                return;
+            }
+
+            // Submit to database
+            try {
+                const response = await fetch('staff_api.php?action=submit_feedback', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        accountNumber: account,
+                        quality: quality,
+                        hygiene: hygiene,
+                        service: service,
+                        comments: comments,
+                        ratings: ratings
+                    })
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    showAlert('Thank you for your feedback!', true);
+
+                    // Reset all stars
+                    document.querySelectorAll('.star').forEach(star => star.classList.remove('active'));
+                    document.querySelectorAll('input[type="hidden"]').forEach(input => input.value = '0');
+                    document.querySelectorAll('.rating-text').forEach(span => span.textContent = 'Not rated');
+                    document.getElementById('comments').value = '';
+
+                    setTimeout(() => {
+                        if (confirm('Feedback submitted successfully! Would you like to view all feedback?')) {
+                            window.location.href = 'feedback_list.html';
+                        }
+                    }, 1000);
+                } else {
+                    showAlert('Error submitting feedback: ' + result.message, false);
+                }
+            } catch (error) {
+                console.error('Error submitting feedback:', error);
+                showAlert('Error submitting feedback. Please try again.', false);
+            }
+        });
+
+        function showAlert(message, isSuccess) {
+            const alertBox = document.getElementById('alertBox');
+            alertBox.style.display = 'block';
+            alertBox.className = 'alert ' + (isSuccess ? 'alert-success' : 'alert-error');
+            alertBox.textContent = message;
+            alertBox.scrollIntoView({ behavior: 'smooth' });
+
+            if (isSuccess) {
+                setTimeout(() => {
+                    alertBox.style.display = 'none';
+                }, 3000);
+            }
+        }
+
+        function escapeHtml(str) {
+            if (!str) return '';
+            return String(str)
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#039;');
+        }
+
+        // Manual refresh function
+        window.refreshStaff = function() {
+            loadStaffMembers();
+        };
+
+        // Force reload staff from database (preserves existing ratings)
+        window.forceReloadStaff = async function() {
+            console.log('Force reloading staff from database...');
+            await loadStaffMembers();
+            showAlert('Staff list refreshed!', true);
+        };
+    </script>
+</body>
+</html>

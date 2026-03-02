@@ -1,0 +1,649 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Feedback Report - Hostel Mess</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #f3f4f6;
+            color: #1f2937;
+            padding: 40px 20px;
+        }
+
+        .report-container {
+            max-width: 1100px;
+            margin: 0 auto;
+            background: white;
+            padding: 40px;
+            border-radius: 24px;
+            box-shadow: 0 10px 40px -10px rgba(0,0,0,0.1);
+        }
+
+        .filter-section {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 40px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid #f3f4f6;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+
+        h1 {
+            margin: 0;
+            font-size: 2rem;
+            color: #111827;
+        }
+
+        .date-form {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+            background: #f9fafb;
+            padding: 8px 16px;
+            border-radius: 12px;
+            border: 1px solid #e5e7eb;
+        }
+
+        .date-form label {
+            font-weight: 500;
+            color: #4b5563;
+        }
+
+        .date-form input[type="date"] {
+            border: none;
+            background: transparent;
+            font-family: inherit;
+            font-weight: 600;
+            color: #4f46e5;
+            outline: none;
+            cursor: pointer;
+            padding: 8px;
+            border-radius: 8px;
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            padding: 8px 16px;
+            background: #4f46e5;
+            color: white;
+            text-decoration: none;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 0.9rem;
+            border: none;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .btn:hover {
+            background: #4338ca;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 25px;
+            margin-bottom: 40px;
+        }
+
+        .stat-card {
+            background: #fff;
+            border-radius: 20px;
+            border: 1px solid #e5e7eb;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+            overflow: hidden;
+        }
+
+        .stat-header {
+            background: #f9fafb;
+            padding: 15px;
+            border-bottom: 1px solid #e5e7eb;
+        }
+
+        .stat-header h3 {
+            margin: 0;
+            color: #374151;
+            font-size: 1.2rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            text-align: center;
+        }
+
+        .stat-body {
+            padding: 20px;
+        }
+
+        .stat-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px;
+            border-bottom: 1px dashed #eee;
+        }
+
+        .stat-row:last-child {
+            border-bottom: none;
+        }
+
+        .stat-label {
+            font-weight: 600;
+            color: #4b5563;
+            width: 80px;
+        }
+
+        .stat-counts {
+            display: flex;
+            gap: 30px;
+            font-weight: 700;
+        }
+
+        .count-like {
+            color: #10b981;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .count-dislike {
+            color: #ef4444;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .table-container {
+            overflow-x: auto;
+            margin-top: 30px;
+            border: 1px solid #e5e7eb;
+            border-radius: 16px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th {
+            background: #f9fafb;
+            color: #374151;
+            font-weight: 600;
+            text-transform: uppercase;
+            font-size: 0.85rem;
+            letter-spacing: 0.05em;
+            padding: 16px;
+            border-bottom: 2px solid #e5e7eb;
+            text-align: left;
+        }
+
+        td {
+            padding: 16px;
+            border-bottom: 1px solid #f3f4f6;
+            vertical-align: middle;
+        }
+
+        tr:hover td {
+            background: #f9fafb;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            letter-spacing: 0.025em;
+        }
+
+        .badge.like {
+            background: #d1fae5;
+            color: #065f46;
+            border: 1px solid #a7f3d0;
+        }
+
+        .badge.dislike {
+            background: #fee2e2;
+            color: #991b1b;
+            border: 1px solid #fecaca;
+        }
+
+        .badge.veg {
+            background: #d1fae5;
+            color: #065f46;
+        }
+
+        .badge.nonveg {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+
+        .badge.breakfast {
+            background: #fef3c7;
+            color: #92400e;
+        }
+
+        .badge.lunch {
+            background: #dbeafe;
+            color: #1e40af;
+        }
+
+        .badge.dinner {
+            background: #ede9fe;
+            color: #5b21b6;
+        }
+
+        .btn-delete {
+            background: #fff;
+            border: 1px solid #fee2e2;
+            color: #ef4444;
+            width: 32px;
+            height: 32px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-size: 16px;
+        }
+
+        .btn-delete:hover {
+            background: #fee2e2;
+            border-color: #fca5a5;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 60px;
+            color: #9ca3af;
+        }
+
+        .empty-state svg {
+            width: 80px;
+            height: 80px;
+            margin-bottom: 20px;
+            color: #d1d5db;
+        }
+
+        .small-text {
+            color: #888;
+            font-size: 0.85rem;
+        }
+
+        @media (max-width: 768px) {
+            .report-container {
+                padding: 20px;
+            }
+
+            .filter-section {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="report-container">
+        <div class="filter-section">
+            <h1>📊 Feedback Report</h1>
+            
+            <form class="date-form" onsubmit="return false;">
+                <label for="filterDate">Select Date:</label>
+                <input type="date" id="filterDate" onchange="loadReport()">
+                <a href="index.html" class="btn">Back to Home</a>
+            </form>
+        </div>
+
+        <!-- Stats Grid -->
+        <div class="stats-grid" id="statsGrid">
+            <!-- Stats will be loaded here -->
+        </div>
+
+        <!-- Detailed Feedback Table -->
+        <h2 style="margin-bottom: 20px;">Detailed Feedback</h2>
+        <div class="table-container">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Date</th>
+                        <th>Student</th>
+                        <th>Meal</th>
+                        <th>Type</th>
+                        <th>Vote</th>
+                        <th>Time</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody id="feedbackTableBody">
+                    <tr>
+                        <td colspan="7" style="text-align: center; padding: 40px;">
+                            Loading feedback data...
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <script>
+        // ===== LOAD REPORT ON PAGE LOAD =====
+        window.addEventListener('load', function() {
+            const today = new Date().toISOString().split('T')[0];
+            document.getElementById('filterDate').value = today;
+            loadReport();
+        });
+
+        // ===== LOAD REPORT DATA =====
+        function loadReport() {
+            const date = document.getElementById('filterDate').value;
+            
+            // Get all feedback from localStorage
+            const allFeedback = getAllFeedback();
+            
+            // Filter by date
+            const filteredFeedback = allFeedback.filter(f => f.date === date);
+            
+            if (filteredFeedback.length === 0) {
+                showEmptyState();
+            } else {
+                updateStats(filteredFeedback);
+                renderTable(filteredFeedback);
+            }
+        }
+
+        // ===== GET ALL FEEDBACK FROM STORAGE =====
+        function getAllFeedback() {
+            const feedbackKey = 'all_menu_feedback';
+            let feedback = JSON.parse(localStorage.getItem(feedbackKey)) || [];
+            
+            // Also check individual student votes
+            const allKeys = Object.keys(localStorage);
+            allKeys.forEach(key => {
+                if (key.startsWith('menu_votes_')) {
+                    const account = key.replace('menu_votes_', '');
+                    const votes = JSON.parse(localStorage.getItem(key)) || {};
+                    
+                    Object.entries(votes).forEach(([date, meals]) => {
+                        Object.values(meals).forEach(voteData => {
+                            if (voteData && voteData.vote) {
+                                // Check if this vote already exists
+                                const exists = feedback.some(f => 
+                                    f.account === voteData.account && 
+                                    f.date === voteData.date && 
+                                    f.meal === voteData.meal &&
+                                    f.item === voteData.item
+                                );
+                                
+                                if (!exists) {
+                                    feedback.push({
+                                        id: Date.now() + Math.random(),
+                                        account: voteData.account,
+                                        full_name: getStudentName(voteData.account),
+                                        date: voteData.date,
+                                        meal: voteData.meal,
+                                        item: voteData.item,
+                                        food_type: voteData.foodType,
+                                        feedback: voteData.vote,
+                                        created_at: voteData.timestamp || new Date().toISOString()
+                                    });
+                                }
+                            }
+                        });
+                    });
+                }
+            });
+            
+            // Save consolidated feedback
+            localStorage.setItem(feedbackKey, JSON.stringify(feedback));
+            
+            return feedback;
+        }
+
+        // ===== GET STUDENT NAME (MOCK FUNCTION) =====
+        function getStudentName(account) {
+            const students = {
+                '541': 'John Doe',
+                '542': 'Jane Smith',
+                '543': 'Bob Wilson',
+                '544': 'Alice Brown',
+                '545': 'Charlie Lee'
+            };
+            return students[account] || 'Unknown';
+        }
+
+        // ===== UPDATE STATISTICS =====
+        function updateStats(feedback) {
+            // Initialize stats exactly like PHP version
+            const stats = {
+                breakfast: {
+                    veg: { like: 0, dislike: 0 },
+                    nonveg: { like: 0, dislike: 0 }
+                },
+                lunch: {
+                    veg: { like: 0, dislike: 0 },
+                    nonveg: { like: 0, dislike: 0 }
+                },
+                dinner: {
+                    veg: { like: 0, dislike: 0 },
+                    nonveg: { like: 0, dislike: 0 }
+                }
+            };
+
+            // Calculate stats
+            feedback.forEach(f => {
+                const meal = f.meal;
+                const type = f.food_type || 'veg';
+                const vote = f.feedback;
+                
+                if (stats[meal] && stats[meal][type] && stats[meal][type][vote] !== undefined) {
+                    stats[meal][type][vote]++;
+                }
+            });
+
+            // Generate HTML for stats grid
+            const statsGrid = document.getElementById('statsGrid');
+            let html = '';
+
+            // Breakfast
+            html += `
+                <div class="stat-card">
+                    <div class="stat-header">
+                        <h3>Breakfast</h3>
+                    </div>
+                    <div class="stat-body">
+                        <div class="stat-row">
+                            <span class="stat-label">Veg</span>
+                            <div class="stat-counts">
+                                <span class="count-like">👍 ${stats.breakfast.veg.like}</span>
+                                <span class="count-dislike">👎 ${stats.breakfast.veg.dislike}</span>
+                            </div>
+                        </div>
+                        <div class="stat-row">
+                            <span class="stat-label">Non-Veg</span>
+                            <div class="stat-counts">
+                                <span class="count-like">👍 ${stats.breakfast.nonveg.like}</span>
+                                <span class="count-dislike">👎 ${stats.breakfast.nonveg.dislike}</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            // Lunch
+            html += `
+                <div class="stat-card">
+                    <div class="stat-header">
+                        <h3>Lunch</h3>
+                    </div>
+                    <div class="stat-body">
+                        <div class="stat-row">
+                            <span class="stat-label">Veg</span>
+                            <div class="stat-counts">
+                                <span class="count-like">👍 ${stats.lunch.veg.like}</span>
+                                <span class="count-dislike">👎 ${stats.lunch.veg.dislike}</span>
+                            </div>
+                        </div>
+                        <div class="stat-row">
+                            <span class="stat-label">Non-Veg</span>
+                            <div class="stat-counts">
+                                <span class="count-like">👍 ${stats.lunch.nonveg.like}</span>
+                                <span class="count-dislike">👎 ${stats.lunch.nonveg.dislike}</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            // Dinner
+            html += `
+                <div class="stat-card">
+                    <div class="stat-header">
+                        <h3>Dinner</h3>
+                    </div>
+                    <div class="stat-body">
+                        <div class="stat-row">
+                            <span class="stat-label">Veg</span>
+                            <div class="stat-counts">
+                                <span class="count-like">👍 ${stats.dinner.veg.like}</span>
+                                <span class="count-dislike">👎 ${stats.dinner.veg.dislike}</span>
+                            </div>
+                        </div>
+                        <div class="stat-row">
+                            <span class="stat-label">Non-Veg</span>
+                            <div class="stat-counts">
+                                <span class="count-like">👍 ${stats.dinner.nonveg.like}</span>
+                                <span class="count-dislike">👎 ${stats.dinner.nonveg.dislike}</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            statsGrid.innerHTML = html;
+        }
+
+        // ===== RENDER TABLE =====
+        function renderTable(feedback) {
+            const tbody = document.getElementById('feedbackTableBody');
+
+            if (feedback.length === 0) {
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="7" style="text-align: center; padding: 40px; color: #888;">
+                            No feedback found for this date.
+                        </td>
+                    </tr>
+                `;
+                return;
+            }
+
+            // Sort by created_at descending (newest first)
+            feedback.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+
+            let html = '';
+            feedback.forEach(f => {
+                const date = new Date(f.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+                const time = f.created_at ? new Date(f.created_at).toLocaleTimeString('en-US', { 
+                    hour: '2-digit', 
+                    minute: '2-digit',
+                    hour12: true 
+                }) : 'N/A';
+                
+                html += `
+                    <tr>
+                        <td>${date}</td>
+                        <td>
+                            <strong>${escapeHtml(f.account)}</strong><br>
+                            <span class="small-text">${escapeHtml(f.full_name || 'Unknown')}</span>
+                        </td>
+                        <td><span class="badge ${f.meal}">${f.meal ? f.meal.charAt(0).toUpperCase() + f.meal.slice(1) : ''}</span></td>
+                        <td><span class="badge ${f.food_type || 'veg'}">${(f.food_type || 'veg').toUpperCase()}</span></td>
+                        <td><span class="badge ${f.feedback}">${f.feedback ? f.feedback.charAt(0).toUpperCase() + f.feedback.slice(1) : ''}</span></td>
+                        <td class="small-text">${time}</td>
+                        <td>
+                            <button class="btn-delete" onclick="deleteFeedback('${f.id}')" title="Delete">🗑️</button>
+                        </td>
+                    </tr>
+                `;
+            });
+
+            tbody.innerHTML = html;
+        }
+
+        // ===== DELETE FEEDBACK =====
+        function deleteFeedback(id) {
+            if (confirm('Are you sure you want to delete this feedback?')) {
+                const date = document.getElementById('filterDate').value;
+                
+                // Get all feedback
+                let allFeedback = JSON.parse(localStorage.getItem('all_menu_feedback')) || [];
+                
+                // Find the feedback to delete
+                const deletedItem = allFeedback.find(f => f.id == id);
+                
+                if (deletedItem) {
+                    // Remove from all feedback
+                    allFeedback = allFeedback.filter(f => f.id != id);
+                    localStorage.setItem('all_menu_feedback', JSON.stringify(allFeedback));
+                    
+                    // Also remove from individual student votes
+                    const storageKey = `menu_votes_${deletedItem.account}`;
+                    const votes = JSON.parse(localStorage.getItem(storageKey)) || {};
+                    
+                    if (votes[deletedItem.date] && votes[deletedItem.date][deletedItem.meal]) {
+                        delete votes[deletedItem.date][deletedItem.meal];
+                        
+                        if (Object.keys(votes[deletedItem.date]).length === 0) {
+                            delete votes[deletedItem.date];
+                        }
+                        
+                        localStorage.setItem(storageKey, JSON.stringify(votes));
+                    }
+                    
+                    // Reload the report
+                    loadReport();
+                }
+            }
+        }
+
+        // ===== SHOW EMPTY STATE =====
+        function showEmptyState() {
+            document.getElementById('statsGrid').innerHTML = '';
+            document.getElementById('feedbackTableBody').innerHTML = `
+                <tr>
+                    <td colspan="7" style="text-align: center; padding: 40px; color: #888;">
+                        No feedback found for this date.
+                    </td>
+                </tr>
+            `;
+        }
+
+        // ===== ESCAPE HTML =====
+        function escapeHtml(str) {
+            if (!str) return '';
+            return String(str)
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#039;');
+        }
+    </script>
+</body>
+</html>

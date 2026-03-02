@@ -1,0 +1,629 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Edit Student — Hostel Mess</title>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet"/>
+  <style>
+    :root {
+      --red:        #F02F34;
+      --deep-red:   #bd1e51;
+      --dark-purple:#490b3d;
+      --blue:       #00abe1;
+      --cream:      #F5ECD7;
+      --white:      #ffffff;
+      --error:      #dc2626;
+      --success:    #16a34a;
+      --muted:      #6b7280;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'DM Sans', sans-serif;
+      min-height: 100vh;
+      background:
+        linear-gradient(rgba(0,0,0,0.55), rgba(0,0,0,0.65)),
+        url('data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="100" height="100" viewBox="0 0 100 100"%3E%3Crect width="100" height="100" fill="%23490b3d"/%3E%3C/svg%3E') center / cover no-repeat fixed;
+      background-color: #1a0a2e;
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+      padding: 40px 16px 60px;
+    }
+
+    /* ── Shell ── */
+    .shell {
+      width: 100%;
+      max-width: 620px;
+    }
+
+    /* ── Page header ── */
+    .page-header {
+      background: rgba(255,255,255,0.08);
+      backdrop-filter: blur(14px);
+      border: 1px solid rgba(255,255,255,0.18);
+      border-radius: 20px 20px 0 0;
+      padding: 28px 36px 24px;
+      color: var(--white);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .page-header::before {
+      content: '';
+      position: absolute;
+      top: -40px; right: -40px;
+      width: 160px; height: 160px;
+      background: radial-gradient(circle, rgba(240,47,52,0.35), transparent 70%);
+      border-radius: 50%;
+    }
+
+    .page-header-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+
+    .page-header h1 {
+      font-family: 'Playfair Display', serif;
+      font-size: clamp(20px, 4vw, 28px);
+    }
+
+    .page-header p { font-size: 14px; opacity: 0.7; margin-top: 4px; }
+
+    .btn-back {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 8px 18px;
+      background: rgba(255,255,255,0.14);
+      border: 1px solid rgba(255,255,255,0.28);
+      color: white;
+      text-decoration: none;
+      border-radius: 50px;
+      font-size: 13px;
+      font-weight: 600;
+      transition: background 0.2s, transform 0.2s;
+      white-space: nowrap;
+    }
+    .btn-back:hover { background: var(--blue); transform: translateX(-2px); }
+
+    /* ── Card ── */
+    .card {
+      background: var(--cream);
+      border-radius: 0 0 20px 20px;
+      padding: 36px;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.4);
+    }
+
+    /* ── Skeleton / loading state ── */
+    .skeleton-wrap { display: flex; flex-direction: column; gap: 16px; padding: 8px 0; }
+    .skeleton {
+      background: linear-gradient(90deg, #e5d5c5 25%, #f0e4d4 50%, #e5d5c5 75%);
+      background-size: 200% 100%;
+      animation: shimmer 1.2s infinite;
+      border-radius: 8px;
+    }
+    .sk-photo  { width: 100px; height: 100px; border-radius: 50%; align-self: center; }
+    .sk-line-l { height: 16px; width: 70%; }
+    .sk-line-m { height: 14px; width: 50%; }
+    .sk-line-s { height: 14px; width: 35%; }
+    .sk-input  { height: 44px; }
+    @keyframes shimmer { to { background-position: -200% 0; } }
+
+    /* ── Alert ── */
+    .alert {
+      border-left: 5px solid var(--error);
+      background: #fff0f0;
+      color: #7a0000;
+      padding: 14px 16px;
+      border-radius: 8px;
+      font-size: 14px;
+      margin-bottom: 22px;
+    }
+    .alert ul { padding-left: 18px; }
+    .alert li  { margin: 4px 0; }
+    .alert-success {
+      border-left-color: var(--success);
+      background: #f0fff7;
+      color: #004d2a;
+    }
+
+    /* ── Photo section ── */
+    .photo-section {
+      text-align: center;
+      padding: 20px;
+      background: rgba(73,11,61,0.06);
+      border-radius: 14px;
+      margin-bottom: 24px;
+    }
+
+    .photo-section label.section-label {
+      display: block;
+      font-size: 12px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: var(--deep-red);
+      margin-bottom: 14px;
+    }
+
+    .photo-ring {
+      position: relative;
+      width: 110px;
+      height: 110px;
+      margin: 0 auto 14px;
+      cursor: pointer;
+    }
+
+    .photo-ring img {
+      width: 110px;
+      height: 110px;
+      border-radius: 50%;
+      object-fit: cover;
+      border: 4px solid var(--deep-red);
+      display: block;
+    }
+
+    .photo-ring .photo-overlay {
+      position: absolute;
+      inset: 0;
+      border-radius: 50%;
+      background: rgba(0,0,0,0.45);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      opacity: 0;
+      transition: opacity 0.2s;
+      color: white;
+      font-size: 28px;
+    }
+
+    .photo-ring:hover .photo-overlay { opacity: 1; }
+
+    input[type="file"]#photo { display: none; }
+
+    .photo-hint {
+      font-size: 12px;
+      color: var(--muted);
+      margin-top: 4px;
+    }
+
+    /* ── Section divider ── */
+    .divider {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin: 26px 0 18px;
+    }
+    .divider span {
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 1.2px;
+      color: var(--deep-red);
+      white-space: nowrap;
+    }
+    .divider::before, .divider::after {
+      content: ''; flex: 1; height: 1px; background: #d4bca8;
+    }
+
+    /* ── Form grid ── */
+    .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+    .form-grid .full { grid-column: 1 / -1; }
+
+    /* ── Form group ── */
+    .form-group { display: flex; flex-direction: column; }
+
+    .form-group label {
+      font-size: 12px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: var(--dark-purple);
+      margin-bottom: 6px;
+    }
+    .form-group label .req { color: var(--red); margin-left: 2px; }
+
+    .form-group input,
+    .form-group select {
+      padding: 11px 14px;
+      border: 2px solid #ddd0c5;
+      border-radius: 10px;
+      background: white;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 14px;
+      color: #2a1a2e;
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+
+    .form-group input:focus,
+    .form-group select:focus {
+      outline: none;
+      border-color: var(--blue);
+      box-shadow: 0 0 0 4px rgba(0,171,225,0.15);
+    }
+
+    .form-group input.invalid { border-color: var(--error); }
+    .field-error {
+      font-size: 12px;
+      color: var(--error);
+      margin-top: 4px;
+      display: none;
+    }
+    .form-group input.invalid ~ .field-error { display: block; }
+
+    /* ── Actions ── */
+    .form-actions {
+      display: flex;
+      gap: 12px;
+      margin-top: 28px;
+    }
+
+    .btn {
+      flex: 1;
+      padding: 13px;
+      border: none;
+      border-radius: 10px;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 15px;
+      font-weight: 600;
+      cursor: pointer;
+      text-align: center;
+      text-decoration: none;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      transition: box-shadow 0.2s, transform 0.15s, background 0.2s;
+    }
+    .btn:active { transform: scale(0.98); }
+
+    .btn-primary {
+      background: linear-gradient(135deg, var(--red), var(--deep-red));
+      color: white;
+      box-shadow: 0 4px 14px rgba(189,30,81,0.4);
+    }
+    .btn-primary:hover    { box-shadow: 0 6px 20px rgba(189,30,81,0.55); }
+    .btn-primary:disabled { opacity: 0.65; cursor: not-allowed; }
+
+    .btn-secondary {
+      background: var(--dark-purple);
+      color: white;
+    }
+    .btn-secondary:hover { background: #6b1060; }
+
+    /* ── Spinner ── */
+    .spinner {
+      display: none;
+      width: 16px; height: 16px;
+      border: 2px solid rgba(255,255,255,0.4);
+      border-top-color: white;
+      border-radius: 50%;
+      animation: spin 0.7s linear infinite;
+    }
+    .btn-primary.loading .spinner  { display: block; }
+    .btn-primary.loading .btn-text { opacity: 0.7; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* ── Not found state ── */
+    .not-found {
+      text-align: center;
+      padding: 32px 0 8px;
+      color: var(--muted);
+    }
+    .not-found p { margin-bottom: 16px; font-size: 15px; }
+
+    /* ── Responsive ── */
+    @media (max-width: 520px) {
+      .card, .page-header { padding: 24px 18px; }
+      .form-grid { grid-template-columns: 1fr; }
+      .form-grid .full { grid-column: auto; }
+      .form-actions { flex-direction: column; }
+    }
+  </style>
+</head>
+<body>
+<div class="shell">
+
+  <!-- Page header -->
+  <div class="page-header">
+    <div class="page-header-row">
+      <div>
+        <h1>✏️ Edit Student Details</h1>
+        <p id="headerSub">Loading student information…</p>
+      </div>
+      <a href="index.html" class="btn-back" id="backBtn">← Back to Home</a>
+    </div>
+  </div>
+
+  <!-- Card -->
+  <div class="card">
+
+    <!-- Alert box -->
+    <div id="alertBox" style="display:none;"></div>
+
+    <!-- Loading skeleton -->
+    <div id="skeleton">
+      <div class="skeleton-wrap">
+        <div class="skeleton sk-photo"></div>
+        <div class="skeleton sk-line-l"></div>
+        <div class="skeleton sk-line-m"></div>
+        <div class="skeleton sk-input"></div>
+        <div class="skeleton sk-input"></div>
+        <div class="skeleton sk-input"></div>
+        <div class="skeleton sk-line-s"></div>
+        <div class="skeleton sk-input"></div>
+        <div class="skeleton sk-input"></div>
+      </div>
+    </div>
+
+    <!-- Edit form (hidden until student loads) -->
+    <form id="editForm" style="display:none;" novalidate>
+      <input type="hidden" id="account_number" name="account_number"/>
+
+      <!-- Photo -->
+      <div class="photo-section">
+        <label class="section-label">📷 Profile Photo</label>
+        <div class="photo-ring" onclick="document.getElementById('photo').click()" title="Click to change photo">
+          <img id="photoPreview" src="assets/images/default-profile.png" alt="Student Photo"/>
+          <div class="photo-overlay">📷</div>
+        </div>
+        <input type="file" id="photo" name="photo" accept="image/png,image/jpeg,image/webp"/>
+        <p class="photo-hint">Click photo to change · PNG, JPG, WEBP · Max 5 MB</p>
+      </div>
+
+      <!-- Student identity -->
+      <div class="divider"><span>Student Identity</span></div>
+      <div class="form-grid">
+        <div class="form-group full">
+          <label for="full_name">Full Name <span class="req">*</span></label>
+          <input type="text" id="full_name" name="full_name" placeholder="Enter full name" required/>
+          <span class="field-error">Full name is required.</span>
+        </div>
+        <div class="form-group">
+          <label for="email">Email</label>
+          <input type="email" id="email" name="email" placeholder="student@example.com"/>
+          <span class="field-error">Enter a valid email.</span>
+        </div>
+        <div class="form-group">
+          <label for="phone">Phone</label>
+          <input type="tel" id="phone" name="phone" placeholder="+91 98765 43210"/>
+          <span class="field-error">Enter a valid phone.</span>
+        </div>
+      </div>
+
+      <!-- Hostel details -->
+      <div class="divider"><span>Hostel Details</span></div>
+      <div class="form-grid">
+        <div class="form-group">
+          <label for="hostel_name">Hostel Name <span class="req">*</span></label>
+          <input type="text" id="hostel_name" name="hostel_name" placeholder="e.g. Block A" required/>
+          <span class="field-error">Hostel name is required.</span>
+        </div>
+        <div class="form-group">
+          <label for="room_number">Room Number <span class="req">*</span></label>
+          <input type="text" id="room_number" name="room_number" placeholder="e.g. 204" required/>
+          <span class="field-error">Room number is required.</span>
+        </div>
+        <div class="form-group full">
+          <label for="food_preference">Food Preference</label>
+          <select id="food_preference" name="food_preference">
+            <option value="veg">🥦 Vegetarian</option>
+            <option value="non-veg">🍗 Non-Vegetarian</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- Actions -->
+      <div class="form-actions">
+        <button type="submit" class="btn btn-primary" id="saveBtn">
+          <span class="spinner"></span>
+          <span class="btn-text">💾 Save Changes</span>
+        </button>
+        <a href="index.html" id="cancelBtn" class="btn btn-secondary">Cancel</a>
+      </div>
+    </form>
+
+    <!-- Not found state -->
+    <div id="notFound" style="display:none;" class="not-found">
+      <p>⚠️ No student found with that account number.</p>
+      <a href="index.html" class="btn btn-secondary" style="display:inline-flex;max-width:200px;">← Back to Home</a>
+    </div>
+
+  </div><!-- /card -->
+</div><!-- /shell -->
+
+<script>
+(function () {
+  const API = 'api.php';
+
+  const params  = new URLSearchParams(window.location.search);
+  const account = (params.get('account_number') || '').trim();
+
+  const skeleton  = document.getElementById('skeleton');
+  const editForm  = document.getElementById('editForm');
+  const notFound  = document.getElementById('notFound');
+  const alertBox  = document.getElementById('alertBox');
+  const headerSub = document.getElementById('headerSub');
+  const backBtn   = document.getElementById('backBtn');
+  const cancelBtn = document.getElementById('cancelBtn');
+  const saveBtn   = document.getElementById('saveBtn');
+  const preview   = document.getElementById('photoPreview');
+  const photoInp  = document.getElementById('photo');
+
+  if (account) {
+    const homeUrl = 'index.html?account_number=' + encodeURIComponent(account);
+    backBtn.href   = homeUrl;
+    cancelBtn.href = homeUrl;
+  }
+
+  if (!account) {
+    skeleton.style.display = 'none';
+    notFound.style.display = 'block';
+    headerSub.textContent  = 'No account number provided.';
+  } else {
+    loadStudent(account);
+  }
+
+  async function loadStudent(acc) {
+    try {
+      const res  = await fetch(API + '?action=get_student&account_number=' + encodeURIComponent(acc));
+      const json = await res.json();
+
+      skeleton.style.display = 'none';
+
+      if (!json.success) {
+        notFound.style.display = 'block';
+        headerSub.textContent  = 'Student not found.';
+        return;
+      }
+
+      const s = json.data;
+      populateForm(s);
+      headerSub.textContent = 'Editing details for ' + s.full_name;
+      editForm.style.display = 'block';
+
+    } catch (err) {
+      skeleton.style.display = 'none';
+      showAlert(['Cannot reach the server: ' + err.message,
+                 'Make sure you are running this via http://localhost/... and PHP is active.'], false);
+    }
+  }
+
+  function populateForm(s) {
+    document.getElementById('account_number').value  = s.account_number  || '';
+    document.getElementById('full_name').value        = s.full_name        || '';
+    document.getElementById('email').value            = s.email            || '';
+    document.getElementById('phone').value            = s.phone            || '';
+    document.getElementById('hostel_name').value      = s.hostel_name      || '';
+    document.getElementById('room_number').value      = s.room_number      || '';
+    document.getElementById('food_preference').value  = s.food_preference  || 'veg';
+
+    if (s.photo_path) {
+      preview.src = s.photo_path;
+    }
+  }
+
+  photoInp.addEventListener('change', function () {
+    const file = this.files[0];
+    if (!file) return;
+    if (!['image/png', 'image/jpeg', 'image/webp'].includes(file.type)) {
+      showAlert(['Only PNG, JPG, or WEBP images are allowed.'], false);
+      this.value = '';
+      return;
+    }
+    const reader = new FileReader();
+    reader.onload = e => { preview.src = e.target.result; };
+    reader.readAsDataURL(file);
+  });
+
+  function setInvalid(el, msg) {
+    el.classList.add('invalid');
+    const err = el.parentElement.querySelector('.field-error');
+    if (err) { err.textContent = msg; err.style.display = 'block'; }
+  }
+
+  function clearInvalid(el) {
+    el.classList.remove('invalid');
+    const err = el.parentElement.querySelector('.field-error');
+    if (err) err.style.display = 'none';
+  }
+
+  ['full_name', 'email', 'phone', 'hostel_name', 'room_number'].forEach(function (id) {
+    const el = document.getElementById(id);
+    if (el) el.addEventListener('input', function () { clearInvalid(el); });
+  });
+
+  function showAlert(messages, isSuccess) {
+    alertBox.style.display = 'block';
+    alertBox.className = 'alert' + (isSuccess ? ' alert-success' : '');
+    if (isSuccess) {
+      alertBox.innerHTML = '<strong>✅ ' + messages[0] + '</strong>';
+    } else {
+      alertBox.innerHTML = '<strong>Please fix the following:</strong><ul>' +
+        messages.map(function (m) { return '<li>' + m + '</li>'; }).join('') + '</ul>';
+    }
+    alertBox.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+
+  editForm.addEventListener('submit', async function (e) {
+    e.preventDefault();
+    alertBox.style.display = 'none';
+
+    const fullName = document.getElementById('full_name');
+    const email    = document.getElementById('email');
+    const phone    = document.getElementById('phone');
+    const hostel   = document.getElementById('hostel_name');
+    const room     = document.getElementById('room_number');
+
+    let valid = true;
+    if (!fullName.value.trim()) { setInvalid(fullName, 'Full name is required.'); valid = false; }
+    if (!hostel.value.trim())   { setInvalid(hostel,   'Hostel name is required.'); valid = false; }
+    if (!room.value.trim())     { setInvalid(room,     'Room number is required.'); valid = false; }
+    if (email.value && !/^\S+@\S+\.\S+$/.test(email.value)) {
+      setInvalid(email, 'Enter a valid email address.'); valid = false;
+    }
+    if (phone.value && !/^[0-9+\-\s()]{6,20}$/.test(phone.value)) {
+      setInvalid(phone, 'Enter a valid phone number.'); valid = false;
+    }
+    if (!valid) return;
+
+    saveBtn.classList.add('loading');
+    saveBtn.disabled = true;
+
+    try {
+      const fd = new FormData(editForm);
+      if (photoInp.files[0]) fd.set('photo', photoInp.files[0]);
+
+      const res = await fetch(API + '?action=update_student', {
+        method: 'POST',
+        body: fd
+      });
+
+      const raw = await res.text();
+      let data;
+      try {
+        data = JSON.parse(raw);
+      } catch (_) {
+        const cleaned = raw.replace(/<[^>]*>/g, '').trim().substring(0, 400);
+        showAlert([
+          'Server did not return valid JSON.',
+          cleaned ? 'Server response: ' + cleaned : 'Response was empty.',
+          'Make sure api.php is in the same folder and PHP is running.'
+        ], false);
+        return;
+      }
+
+      if (data.success) {
+        showAlert(['Changes saved successfully! Redirecting…'], true);
+        setTimeout(function () {
+          window.location.href = 'index.html?account_number=' +
+            encodeURIComponent(document.getElementById('account_number').value);
+        }, 1500);
+      } else {
+        const msgs = (Array.isArray(data.errors) && data.errors.length)
+          ? data.errors
+          : ['An unknown error occurred. Check the browser console.'];
+        showAlert(msgs, false);
+      }
+
+    } catch (err) {
+      showAlert([
+        'Cannot reach the server: ' + err.message,
+        'Make sure you are opening this via http://localhost/... (not file://).'
+      ], false);
+    } finally {
+      saveBtn.classList.remove('loading');
+      saveBtn.disabled = false;
+    }
+  });
+
+})();
+</script>
+</body>
+</html>

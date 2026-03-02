@@ -1,0 +1,503 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student Login - Hostel Mess</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        /* Login Container */
+        .login-container {
+            width: 100%;
+            max-width: 400px;
+        }
+
+        /* Login Card */
+        .login-card {
+            background: white;
+            border-radius: 20px;
+            padding: 40px 30px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            animation: slideIn 0.5s ease;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Header */
+        .login-header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .logo {
+            width: 80px;
+            height: 80px;
+            background: linear-gradient(135deg, #f43f5e, #e11d48);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 15px;
+            font-size: 40px;
+            color: white;
+            box-shadow: 0 10px 20px rgba(244, 63, 94, 0.3);
+        }
+
+        .login-header h2 {
+            color: #1e293b;
+            font-size: 24px;
+            margin-bottom: 5px;
+        }
+
+        .login-header p {
+            color: #64748b;
+            font-size: 14px;
+        }
+
+        /* Form */
+        .login-form {
+            margin-bottom: 20px;
+        }
+
+        .input-group {
+            margin-bottom: 20px;
+        }
+
+        .input-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #1e293b;
+            font-size: 14px;
+        }
+
+        .input-group input {
+            width: 100%;
+            padding: 15px;
+            border: 2px solid #e2e8f0;
+            border-radius: 12px;
+            font-size: 16px;
+            transition: all 0.3s ease;
+            outline: none;
+        }
+
+        .input-group input:focus {
+            border-color: #f43f5e;
+            box-shadow: 0 0 0 4px rgba(244, 63, 94, 0.1);
+        }
+
+        .input-group input.error {
+            border-color: #dc2626;
+            background: #fef2f2;
+        }
+
+        /* Login Button */
+        .login-btn {
+            width: 100%;
+            padding: 15px;
+            background: linear-gradient(135deg, #f43f5e, #e11d48);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .login-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(244, 63, 94, 0.4);
+        }
+
+        .login-btn:active {
+            transform: translateY(0);
+        }
+
+        .login-btn.loading {
+            opacity: 0.7;
+            cursor: not-allowed;
+        }
+
+        .login-btn.loading::after {
+            content: '';
+            position: absolute;
+            width: 20px;
+            height: 20px;
+            top: 50%;
+            left: 50%;
+            margin-left: -10px;
+            margin-top: -10px;
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            border-top-color: white;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* Error Message */
+        .error-message {
+            background: #fef2f2;
+            border: 1px solid #fee2e2;
+            border-radius: 10px;
+            padding: 12px 15px;
+            margin-bottom: 20px;
+            color: #991b1b;
+            font-size: 14px;
+            display: none;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .error-message.show {
+            display: flex;
+            animation: shake 0.3s ease;
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-5px); }
+            75% { transform: translateX(5px); }
+        }
+
+        /* Sample Accounts */
+        .sample-box {
+            background: #f8fafc;
+            border-radius: 12px;
+            padding: 20px;
+            border: 1px solid #e2e8f0;
+            margin-top: 20px;
+        }
+
+        .sample-box h4 {
+            color: #1e293b;
+            margin-bottom: 15px;
+            font-size: 14px;
+            text-align: center;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .account-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px;
+            background: white;
+            border-radius: 8px;
+            margin-bottom: 8px;
+            border: 1px solid #e2e8f0;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .account-item:hover {
+            border-color: #f43f5e;
+            transform: translateX(5px);
+            background: #fff5f5;
+        }
+
+        .account-icon {
+            width: 35px;
+            height: 35px;
+            background: #f1f5f9;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            color: #f43f5e;
+        }
+
+        .account-number {
+            flex: 1;
+            font-weight: 600;
+            color: #1e293b;
+            font-size: 16px;
+        }
+
+        .account-name {
+            color: #64748b;
+            font-size: 13px;
+        }
+
+        /* Links */
+        .links {
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        .links a {
+            color: #64748b;
+            text-decoration: none;
+            font-size: 14px;
+            margin: 0 10px;
+            transition: color 0.2s;
+        }
+
+        .links a:hover {
+            color: #f43f5e;
+        }
+
+        .links .separator {
+            color: #cbd5e1;
+        }
+
+        /* Responsive */
+        @media (max-width: 480px) {
+            .login-card {
+                padding: 30px 20px;
+            }
+
+            .logo {
+                width: 70px;
+                height: 70px;
+                font-size: 35px;
+            }
+
+            .login-header h2 {
+                font-size: 22px;
+            }
+
+            .account-item {
+                flex-wrap: wrap;
+            }
+
+            .links a {
+                display: block;
+                margin: 8px 0;
+            }
+
+            .links .separator {
+                display: none;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="login-container">
+        <div class="login-card">
+            <!-- Header -->
+            <div class="login-header">
+                <div class="logo">🎓</div>
+                <h2>Student Login</h2>
+                <p>Enter your account number to continue</p>
+            </div>
+
+            <!-- Error Message -->
+            <div id="errorMessage" class="error-message">
+                <span>⚠️</span>
+                <span id="errorText">Invalid account number</span>
+            </div>
+
+            <!-- Login Form -->
+            <form id="loginForm" onsubmit="handleLogin(event)">
+                <div class="input-group">
+                    <label for="accountNumber">Account Number</label>
+                    <input type="text" 
+                           id="accountNumber" 
+                           name="accountNumber" 
+                           placeholder="Enter your account number (e.g., 541)"
+                           autocomplete="off"
+                           required>
+                </div>
+
+                <button type="submit" class="login-btn" id="loginBtn">
+                    Login to Dashboard
+                </button>
+            </form>
+
+            <!-- Sample Account Numbers -->
+            <div class="sample-box">
+                <h4>📋 Sample Account Numbers</h4>
+                
+                <div class="account-item" onclick="fillAccount('541')">
+                    <div class="account-icon">👤</div>
+                    <div>
+                        <div class="account-number">541</div>
+                        <div class="account-name">John Doe</div>
+                    </div>
+                </div>
+
+                <div class="account-item" onclick="fillAccount('542')">
+                    <div class="account-icon">👩</div>
+                    <div>
+                        <div class="account-number">542</div>
+                        <div class="account-name">Jane Smith</div>
+                    </div>
+                </div>
+
+                <div class="account-item" onclick="fillAccount('543')">
+                    <div class="account-icon">👨</div>
+                    <div>
+                        <div class="account-number">543</div>
+                        <div class="account-name">Bob Wilson</div>
+                    </div>
+                </div>
+
+                <div class="account-item" onclick="fillAccount('544')">
+                    <div class="account-icon">👩</div>
+                    <div>
+                        <div class="account-number">544</div>
+                        <div class="account-name">Alice Brown</div>
+                    </div>
+                </div>
+
+                <div class="account-item" onclick="fillAccount('545')">
+                    <div class="account-icon">👨</div>
+                    <div>
+                        <div class="account-number">545</div>
+                        <div class="account-name">Charlie Lee</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Links -->
+            <div class="links">
+                <a href="index.html">🏠 Home</a>
+                <span class="separator">|</span>
+                <a href="register.html">📝 New Student? Register</a>
+                <span class="separator">|</span>
+                <a href="#" onclick="showHelp()">❓ Help</a>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Valid account numbers (in a real app, this would be checked against database)
+        const validAccounts = ['541', '542', '543', '544', '545', '546', '547', '548'];
+
+        // Handle login
+        function handleLogin(event) {
+            event.preventDefault();
+
+            const accountNumber = document.getElementById('accountNumber').value.trim();
+            const loginBtn = document.getElementById('loginBtn');
+
+            // Clear previous errors
+            clearErrors();
+
+            // Validate
+            if (!accountNumber) {
+                showError('Please enter your account number');
+                return;
+            }
+
+            // Show loading
+            loginBtn.classList.add('loading');
+            loginBtn.disabled = true;
+
+            // Simulate API check
+            setTimeout(() => {
+                // Check if account exists (in real app, this would be an API call)
+                if (validAccounts.includes(accountNumber)) {
+                    // Save to session
+                    sessionStorage.setItem('studentAccount', accountNumber);
+                    sessionStorage.setItem('studentLoggedIn', 'true');
+                    
+                    // Redirect to student dashboard or home page with account
+                    window.location.href = `index.html?account_number=${accountNumber}`;
+                } else {
+                    showError('Invalid account number. Please try again.');
+                    document.getElementById('accountNumber').classList.add('error');
+                    
+                    loginBtn.classList.remove('loading');
+                    loginBtn.disabled = false;
+                }
+            }, 800);
+        }
+
+        // Fill account number from sample
+        function fillAccount(account) {
+            document.getElementById('accountNumber').value = account;
+            document.getElementById('accountNumber').classList.remove('error');
+            document.getElementById('errorMessage').classList.remove('show');
+            
+            // Optional: Auto-submit after filling
+            // handleLogin(new Event('submit'));
+        }
+
+        // Show error
+        function showError(message) {
+            const errorDiv = document.getElementById('errorMessage');
+            const errorText = document.getElementById('errorText');
+            
+            errorText.textContent = message;
+            errorDiv.classList.add('show');
+        }
+
+        // Clear errors
+        function clearErrors() {
+            document.getElementById('errorMessage').classList.remove('show');
+            document.getElementById('accountNumber').classList.remove('error');
+        }
+
+        // Show help
+        function showHelp() {
+            alert('📌 How to Login:\n\n' +
+                  '1. Enter your student account number\n' +
+                  '2. Use one of the sample numbers if you\'re new\n' +
+                  '3. After login, you can:\n' +
+                  '   • View your details\n' +
+                  '   • Record meals\n' +
+                  '   • Give feedback\n' +
+                  '   • View meal history\n\n' +
+                  'For new students, please register first.');
+        }
+
+        // Clear error on input
+        document.getElementById('accountNumber').addEventListener('input', function() {
+            this.classList.remove('error');
+            document.getElementById('errorMessage').classList.remove('show');
+        });
+
+        // Handle enter key
+        document.getElementById('accountNumber').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                handleLogin(e);
+            }
+        });
+
+        // Check if already logged in
+        window.addEventListener('load', function() {
+            const loggedIn = sessionStorage.getItem('studentLoggedIn');
+            const account = sessionStorage.getItem('studentAccount');
+            
+            if (loggedIn === 'true' && account) {
+                // Optional: Ask if they want to continue
+                if (confirm('You are already logged in. Continue to dashboard?')) {
+                    window.location.href = `index.html?account_number=${account}`;
+                }
+            }
+        });
+    </script>
+</body>
+</html>

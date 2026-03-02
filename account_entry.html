@@ -1,0 +1,441 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Enter Account - Hostel Mess</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 450px;
+        }
+
+        .card {
+            background: white;
+            border-radius: 20px;
+            padding: 40px 35px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            text-align: center;
+            animation: slideUp 0.5s ease;
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .logo {
+            width: 80px;
+            height: 80px;
+            background: linear-gradient(135deg, #f43f5e, #e11d48);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 20px;
+            font-size: 35px;
+            color: white;
+            box-shadow: 0 10px 20px rgba(244, 63, 94, 0.3);
+        }
+
+        h2 {
+            color: #1e293b;
+            font-size: 24px;
+            margin-bottom: 8px;
+        }
+
+        .subtitle {
+            color: #64748b;
+            font-size: 14px;
+            margin-bottom: 30px;
+        }
+
+        .input-group {
+            margin-bottom: 25px;
+            text-align: left;
+        }
+
+        .input-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #1e293b;
+            font-size: 14px;
+        }
+
+        .input-group input {
+            width: 100%;
+            padding: 15px;
+            border: 2px solid #e2e8f0;
+            border-radius: 12px;
+            font-size: 16px;
+            transition: all 0.3s ease;
+            outline: none;
+        }
+
+        .input-group input:focus {
+            border-color: #f43f5e;
+            box-shadow: 0 0 0 4px rgba(244, 63, 94, 0.1);
+        }
+
+        .input-group input.error {
+            border-color: #dc2626;
+            background: #fef2f2;
+        }
+
+        .hint {
+            color: #94a3b8;
+            font-size: 13px;
+            margin-top: 5px;
+        }
+
+        .btn {
+            width: 100%;
+            padding: 15px;
+            background: linear-gradient(135deg, #f43f5e, #e11d48);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-bottom: 20px;
+            position: relative;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(244, 63, 94, 0.4);
+        }
+
+        .btn:active {
+            transform: translateY(0);
+        }
+
+        .btn.loading {
+            opacity: 0.7;
+            cursor: not-allowed;
+        }
+
+        .btn.loading::after {
+            content: '';
+            position: absolute;
+            width: 20px;
+            height: 20px;
+            top: 50%;
+            left: 50%;
+            margin-left: -10px;
+            margin-top: -10px;
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            border-top-color: white;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        .error-message {
+            background: #fef2f2;
+            border: 1px solid #fee2e2;
+            border-radius: 10px;
+            padding: 12px 15px;
+            margin-bottom: 20px;
+            color: #991b1b;
+            font-size: 14px;
+            display: none;
+            align-items: center;
+            gap: 8px;
+            text-align: left;
+        }
+
+        .error-message.show {
+            display: flex;
+            animation: shake 0.3s ease;
+        }
+
+        @keyframes shake {
+
+            0%,
+            100% {
+                transform: translateX(0);
+            }
+
+            25% {
+                transform: translateX(-5px);
+            }
+
+            75% {
+                transform: translateX(5px);
+            }
+        }
+
+        .sample-box {
+            background: #f8fafc;
+            border-radius: 12px;
+            padding: 20px;
+            border: 1px solid #e2e8f0;
+            margin-top: 15px;
+        }
+
+        .sample-box h4 {
+            color: #1e293b;
+            margin-bottom: 15px;
+            font-size: 14px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .account-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            justify-content: center;
+        }
+
+        .account-chip {
+            padding: 8px 16px;
+            background: white;
+            border: 1px solid #e2e8f0;
+            border-radius: 30px;
+            font-size: 14px;
+            font-weight: 600;
+            color: #1e293b;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .account-chip:hover {
+            background: #f43f5e;
+            color: white;
+            border-color: #f43f5e;
+            transform: scale(1.05);
+        }
+
+        .links {
+            margin-top: 25px;
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+        }
+
+        .links a {
+            color: #64748b;
+            text-decoration: none;
+            font-size: 14px;
+            transition: color 0.2s;
+        }
+
+        .links a:hover {
+            color: #f43f5e;
+        }
+
+        .separator {
+            color: #cbd5e1;
+        }
+
+        @media (max-width: 480px) {
+            .card {
+                padding: 30px 20px;
+            }
+
+            .logo {
+                width: 70px;
+                height: 70px;
+                font-size: 30px;
+            }
+
+            h2 {
+                font-size: 22px;
+            }
+
+            .account-list {
+                gap: 8px;
+            }
+
+            .account-chip {
+                padding: 6px 12px;
+                font-size: 13px;
+            }
+
+            .links {
+                flex-direction: column;
+                gap: 10px;
+            }
+
+            .separator {
+                display: none;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <div class="card">
+            <!-- Logo -->
+            <div class="logo">💬</div>
+
+            <!-- Title -->
+            <h2>Feedback Access</h2>
+            <div class="subtitle">Enter your account number to continue</div>
+
+            <!-- Error Message -->
+            <div id="errorMessage" class="error-message">
+                <span>⚠️</span>
+                <span id="errorText">Invalid account number</span>
+            </div>
+
+            <!-- Form -->
+            <form id="accountForm" onsubmit="handleSubmit(event)">
+                <div class="input-group">
+                    <label for="accountNumber">Enter Your Account Number</label>
+                    <input type="text" id="accountNumber" name="accountNumber" placeholder="e.g., 541"
+                        autocomplete="off" required>
+                    <div class="hint">Enter the account number provided during registration</div>
+                </div>
+
+                <button type="submit" class="btn" id="submitBtn">
+                    View Feedback Page →
+                </button>
+            </form>
+
+            <!-- Sample Account Numbers -->
+            <div class="sample-box">
+                <h4>📋 Sample Account Numbers</h4>
+                <div class="account-list">
+                    <span class="account-chip" onclick="fillAccount('541')">541</span>
+                    <span class="account-chip" onclick="fillAccount('542')">542</span>
+                    <span class="account-chip" onclick="fillAccount('543')">543</span>
+                    <span class="account-chip" onclick="fillAccount('544')">544</span>
+                    <span class="account-chip" onclick="fillAccount('545')">545</span>
+                </div>
+            </div>
+
+            <!-- Links -->
+            <div class="links">
+                <a href="index.html">🏠 Home</a>
+                <span class="separator">|</span>
+                <a href="register.html">📝 New Student? Register</a>
+                <span class="separator">|</span>
+                <a href="#" onclick="showHelp()">❓ Help</a>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Valid account numbers (in real app, this would be checked against database)
+        const validAccounts = ['541', '542', '543', '544', '545', '546', '547', '548'];
+
+        // Handle form submission
+        function handleSubmit(event) {
+            event.preventDefault();
+
+            const accountNumber = document.getElementById('accountNumber').value.trim();
+            const submitBtn = document.getElementById('submitBtn');
+            const errorDiv = document.getElementById('errorMessage');
+
+            // Clear previous states
+            errorDiv.classList.remove('show');
+            document.getElementById('accountNumber').classList.remove('error');
+
+            // Validate
+            if (!accountNumber) {
+                showError('Please enter your account number');
+                return;
+            }
+
+            // Show loading
+            submitBtn.classList.add('loading');
+            submitBtn.disabled = true;
+
+            fetch(`api.php?action=search&account_number=${encodeURIComponent(accountNumber)}`)
+                .then(res => res.json())
+                .then(data => {
+                    if (data.success) {
+                        sessionStorage.setItem('feedbackAccount', accountNumber);
+                        window.location.href = `feedback.html?account_number=${accountNumber}`;
+                    } else {
+                        showError(data.errors?.[0] || 'Account number not found.');
+                        document.getElementById('accountNumber').classList.add('error');
+                        submitBtn.classList.remove('loading');
+                        submitBtn.disabled = false;
+                    }
+                })
+                .catch(err => {
+                    showError('Error connecting to server.');
+                    submitBtn.classList.remove('loading');
+                    submitBtn.disabled = false;
+                });
+        }
+
+        // Fill account number from sample
+        function fillAccount(account) {
+            document.getElementById('accountNumber').value = account;
+            document.getElementById('accountNumber').classList.remove('error');
+            document.getElementById('errorMessage').classList.remove('show');
+        }
+
+        // Show error message
+        function showError(message) {
+            const errorDiv = document.getElementById('errorMessage');
+            const errorText = document.getElementById('errorText');
+
+            errorText.textContent = message;
+            errorDiv.classList.add('show');
+        }
+
+        // Show help
+        function showHelp() {
+            alert('📌 How to Access Feedback:\n\n' +
+                '1. Enter your student account number\n' +
+                '2. If you don\'t have an account, please register first\n' +
+                '3. After entering a valid number, you\'ll be taken to the feedback page\n' +
+                '4. You can then rate staff members and provide feedback\n\n' +
+                'Sample account numbers: 541, 542, 543, 544, 545');
+        }
+
+        // Clear error on input
+        document.getElementById('accountNumber').addEventListener('input', function () {
+            this.classList.remove('error');
+            document.getElementById('errorMessage').classList.remove('show');
+        });
+
+        // Handle enter key
+        document.getElementById('accountNumber').addEventListener('keypress', function (e) {
+            if (e.key === 'Enter') {
+                handleSubmit(e);
+            }
+        });
+    </script>
+</body>
+
+</html>

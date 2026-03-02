@@ -1,0 +1,748 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Menu Upload - Hostel Mess</title>
+    <style>
+        :root {
+            --primary: #6C63FF;
+            --veg: #2ECC71;
+            --nonveg: #FF5C5C;
+            --border: #D6DBFF;
+            --back: #FFB703;
+            --delete: #e74c3c;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #EEF2FF, #F9FAFF);
+            padding: 30px;
+        }
+
+        .container {
+            max-width: 1100px;
+            margin: auto;
+            background: white;
+            padding: 35px;
+            border-radius: 20px;
+            box-shadow: 0 18px 40px rgba(108, 99, 255, 0.15);
+        }
+
+        h1 {
+            color: var(--primary);
+            font-size: 2.2rem;
+            margin-bottom: 10px;
+        }
+
+        p {
+            color: #555;
+            margin-bottom: 25px;
+        }
+
+        .date-box {
+            margin-bottom: 30px;
+        }
+
+        .date-box label {
+            font-weight: 800;
+            color: var(--primary);
+            display: block;
+            margin-bottom: 8px;
+        }
+
+        .date-box input {
+            padding: 12px 16px;
+            font-size: 15px;
+            border-radius: 12px;
+            border: 2px solid var(--border);
+            width: 100%;
+            max-width: 300px;
+            outline: none;
+        }
+
+        .date-box input:focus {
+            border-color: var(--primary);
+        }
+
+        .meal-card {
+            margin-top: 20px;
+            border: 2px solid var(--border);
+            border-radius: 18px;
+            padding: 22px;
+            background: #fff;
+            box-shadow: 0 10px 24px rgba(108, 99, 255, 0.1);
+        }
+
+        .meal-card h3 {
+            margin-bottom: 14px;
+            color: #1f2937;
+            font-size: 1.5rem;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+        }
+
+        .label {
+            font-weight: 700;
+            margin-bottom: 6px;
+        }
+
+        .label.veg {
+            color: var(--veg);
+        }
+
+        .label.nonveg {
+            color: var(--nonveg);
+        }
+
+        textarea {
+            width: 100%;
+            min-height: 80px;
+            padding: 12px 16px;
+            font-size: 14px;
+            border-radius: 12px;
+            border: 2px solid var(--border);
+            resize: vertical;
+            font-family: inherit;
+            outline: none;
+        }
+
+        textarea:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 5px rgba(108, 99, 255, 0.25);
+        }
+
+        .actions {
+            margin-top: 40px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 14px 28px;
+            font-size: 16px;
+            font-weight: 700;
+            border-radius: 14px;
+            border: none;
+            cursor: pointer;
+            text-decoration: none;
+            text-align: center;
+            transition: all 0.2s;
+        }
+
+        .btn-back {
+            background: var(--back);
+            color: #1f1f1f;
+        }
+
+        .btn-back:hover {
+            background: #f5a503;
+            transform: translateY(-2px);
+        }
+
+        .btn-save {
+            background: linear-gradient(135deg, #6C63FF, #8E89FF);
+            color: white;
+            box-shadow: 0 12px 28px rgba(108, 99, 255, 0.4);
+        }
+
+        .btn-save:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 15px 35px rgba(108, 99, 255, 0.5);
+        }
+
+        .btn-delete {
+            background: var(--delete);
+            color: white;
+        }
+
+        .btn-delete:hover {
+            background: #c0392b;
+            transform: translateY(-2px);
+        }
+
+        .btn-view {
+            background: #10b981;
+            color: white;
+        }
+
+        .btn-view:hover {
+            background: #059669;
+        }
+
+        .success {
+            margin: 15px 0;
+            color: #1f8f3e;
+            font-weight: 700;
+            padding: 10px;
+            background: #d1fae5;
+            border-radius: 8px;
+        }
+
+        .menu-list {
+            margin-top: 40px;
+            padding: 20px;
+            background: #f9fafb;
+            border-radius: 12px;
+        }
+
+        .menu-list h3 {
+            margin-bottom: 15px;
+            color: #1f2937;
+        }
+
+        .menu-item-preview {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px;
+            background: white;
+            border-radius: 8px;
+            margin-bottom: 10px;
+            border: 1px solid #e5e7eb;
+        }
+
+        .menu-item-preview .date {
+            font-weight: 600;
+            color: var(--primary);
+            font-size: 1.1rem;
+        }
+
+        .menu-item-preview .items-count {
+            color: #6b7280;
+            margin-left: 10px;
+        }
+
+        .menu-item-preview .actions {
+            margin: 0;
+            display: flex;
+            gap: 8px;
+        }
+
+        .menu-item-preview .actions button {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.2s;
+        }
+
+        .menu-item-preview .actions .edit-btn {
+            background: #e5e7eb;
+            color: #1f2937;
+        }
+
+        .menu-item-preview .actions .edit-btn:hover {
+            background: #d1d5db;
+        }
+
+        .menu-item-preview .actions .delete-btn {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+
+        .menu-item-preview .actions .delete-btn:hover {
+            background: #fecaca;
+        }
+
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 15px 25px;
+            border-radius: 12px;
+            color: white;
+            z-index: 9999;
+            animation: slideIn 0.3s ease;
+        }
+
+        .notification.success {
+            background: #10b981;
+        }
+
+        .notification.error {
+            background: #ef4444;
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+        .button-group {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 20px;
+            }
+
+            .grid {
+                grid-template-columns: 1fr;
+            }
+
+            .actions {
+                flex-direction: column;
+            }
+
+            .btn {
+                width: 100%;
+            }
+
+            .menu-item-preview {
+                flex-direction: column;
+                gap: 10px;
+                text-align: center;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h1>🍽️ Menu Upload</h1>
+        <p>Enter dishes separated by commas (e.g., "Poha, Idli, Vada")</p>
+
+        <div id="successMessage" class="success" style="display: none;"></div>
+
+        <form id="menuForm">
+            <div class="date-box">
+                <label for="menuDate">Select Menu Date</label>
+                <input type="date" id="menuDate" name="menuDate" required>
+            </div>
+
+            <!-- Breakfast -->
+            <div class="meal-card">
+                <h3>🌅 Breakfast</h3>
+                <div class="grid">
+                    <div>
+                        <div class="label veg">🥦 Vegetarian</div>
+                        <textarea id="breakfastVeg" placeholder="Poha, Idli, Vada, Sambar, Tea"></textarea>
+                    </div>
+                    <div>
+                        <div class="label nonveg">🍗 Non-Vegetarian</div>
+                        <textarea id="breakfastNonVeg" placeholder="Egg Bhurji, Chicken Sausage, Boiled Eggs"></textarea>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Lunch -->
+            <div class="meal-card">
+                <h3>🌤️ Lunch</h3>
+                <div class="grid">
+                    <div>
+                        <div class="label veg">🥦 Vegetarian</div>
+                        <textarea id="lunchVeg" placeholder="Dal Makhani, Jeera Rice, Roti, Salad, Curd"></textarea>
+                    </div>
+                    <div>
+                        <div class="label nonveg">🍗 Non-Vegetarian</div>
+                        <textarea id="lunchNonVeg" placeholder="Chicken Curry, Egg Curry, Fish Fry"></textarea>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Dinner -->
+            <div class="meal-card">
+                <h3>🌙 Dinner</h3>
+                <div class="grid">
+                    <div>
+                        <div class="label veg">🥦 Vegetarian</div>
+                        <textarea id="dinnerVeg" placeholder="Palak Paneer, Pulao, Naan, Raita, Gulab Jamun"></textarea>
+                    </div>
+                    <div>
+                        <div class="label nonveg">🍗 Non-Vegetarian</div>
+                        <textarea id="dinnerNonVeg" placeholder="Chicken Biryani, Tandoori Chicken, Mutton Curry"></textarea>
+                    </div>
+                </div>
+            </div>
+
+            <div class="actions">
+                <div class="button-group">
+                    <a href="menu.html" class="btn btn-back">⬅ Back to Menu</a>
+                    <button type="button" class="btn btn-view" onclick="viewTodayMenu()">📋 View Today's Menu</button>
+                </div>
+                <div class="button-group">
+                    <button type="button" class="btn btn-save" onclick="saveMenu()">💾 Save Menu</button>
+                    <button type="button" class="btn btn-delete" onclick="deleteMenu()">🗑️ Delete Menu</button>
+                </div>
+            </div>
+        </form>
+
+        <!-- Saved Menus List -->
+        <div class="menu-list" id="savedMenus">
+            <h3>📋 Saved Menus</h3>
+            <div id="menuList"></div>
+        </div>
+    </div>
+
+    <script>
+        // ===== LOAD SAVED MENUS ON PAGE LOAD =====
+        window.addEventListener('load', function() {
+            const today = new Date().toISOString().split('T')[0];
+            document.getElementById('menuDate').value = today;
+            loadSavedMenus();
+        });
+
+        // ===== SHOW NOTIFICATION =====
+        function showNotification(message, type) {
+            const notification = document.createElement('div');
+            notification.className = `notification ${type}`;
+            notification.textContent = message;
+            document.body.appendChild(notification);
+            
+            setTimeout(() => {
+                notification.remove();
+            }, 3000);
+        }
+
+        // ===== SAVE MENU =====
+        function saveMenu() {
+            const date = document.getElementById('menuDate').value;
+            
+            if (!date) {
+                alert('Please select a date');
+                return;
+            }
+
+            // Get all menu items
+            const breakfastVeg = document.getElementById('breakfastVeg').value.trim();
+            const breakfastNonVeg = document.getElementById('breakfastNonVeg').value.trim();
+            const lunchVeg = document.getElementById('lunchVeg').value.trim();
+            const lunchNonVeg = document.getElementById('lunchNonVeg').value.trim();
+            const dinnerVeg = document.getElementById('dinnerVeg').value.trim();
+            const dinnerNonVeg = document.getElementById('dinnerNonVeg').value.trim();
+
+            // Check if any items entered
+            if (!breakfastVeg && !breakfastNonVeg && !lunchVeg && !lunchNonVeg && !dinnerVeg && !dinnerNonVeg) {
+                alert('Please enter at least one menu item');
+                return;
+            }
+
+            // Process items into the format expected by menu.html
+            const menuItems = [];
+
+            // Process Breakfast Veg
+            if (breakfastVeg) {
+                breakfastVeg.split(',').forEach(item => {
+                    const dish = item.trim();
+                    if (dish) {
+                        menuItems.push({
+                            id: Date.now() + Math.random() + Math.random(),
+                            text: `[Breakfast][VEG] ${dish}`,
+                            meal: 'breakfast',
+                            type: 'veg'
+                        });
+                    }
+                });
+            }
+
+            // Process Breakfast Non-Veg
+            if (breakfastNonVeg) {
+                breakfastNonVeg.split(',').forEach(item => {
+                    const dish = item.trim();
+                    if (dish) {
+                        menuItems.push({
+                            id: Date.now() + Math.random() + Math.random(),
+                            text: `[Breakfast][NONVEG] ${dish}`,
+                            meal: 'breakfast',
+                            type: 'nonveg'
+                        });
+                    }
+                });
+            }
+
+            // Process Lunch Veg
+            if (lunchVeg) {
+                lunchVeg.split(',').forEach(item => {
+                    const dish = item.trim();
+                    if (dish) {
+                        menuItems.push({
+                            id: Date.now() + Math.random() + Math.random(),
+                            text: `[Lunch][VEG] ${dish}`,
+                            meal: 'lunch',
+                            type: 'veg'
+                        });
+                    }
+                });
+            }
+
+            // Process Lunch Non-Veg
+            if (lunchNonVeg) {
+                lunchNonVeg.split(',').forEach(item => {
+                    const dish = item.trim();
+                    if (dish) {
+                        menuItems.push({
+                            id: Date.now() + Math.random() + Math.random(),
+                            text: `[Lunch][NONVEG] ${dish}`,
+                            meal: 'lunch',
+                            type: 'nonveg'
+                        });
+                    }
+                });
+            }
+
+            // Process Dinner Veg
+            if (dinnerVeg) {
+                dinnerVeg.split(',').forEach(item => {
+                    const dish = item.trim();
+                    if (dish) {
+                        menuItems.push({
+                            id: Date.now() + Math.random() + Math.random(),
+                            text: `[Dinner][VEG] ${dish}`,
+                            meal: 'dinner',
+                            type: 'veg'
+                        });
+                    }
+                });
+            }
+
+            // Process Dinner Non-Veg
+            if (dinnerNonVeg) {
+                dinnerNonVeg.split(',').forEach(item => {
+                    const dish = item.trim();
+                    if (dish) {
+                        menuItems.push({
+                            id: Date.now() + Math.random() + Math.random(),
+                            text: `[Dinner][NONVEG] ${dish}`,
+                            meal: 'dinner',
+                            type: 'nonveg'
+                        });
+                    }
+                });
+            }
+
+            // Save to localStorage
+            const savedMenus = JSON.parse(localStorage.getItem('saved_menus')) || {};
+            
+            savedMenus[date] = {
+                date: date,
+                items: menuItems,
+                breakfast: {
+                    veg: breakfastVeg,
+                    nonveg: breakfastNonVeg
+                },
+                lunch: {
+                    veg: lunchVeg,
+                    nonveg: lunchNonVeg
+                },
+                dinner: {
+                    veg: dinnerVeg,
+                    nonveg: dinnerNonVeg
+                }
+            };
+            
+            localStorage.setItem('saved_menus', JSON.stringify(savedMenus));
+
+            // Also save to a format that menu.html can read directly
+            const menuData = {
+                date: date,
+                items: menuItems
+            };
+            
+            // Store the current menu for today
+            localStorage.setItem('current_menu', JSON.stringify(menuData));
+            
+            // If this is today's date, also store as today's menu
+            const today = new Date().toISOString().split('T')[0];
+            if (date === today) {
+                localStorage.setItem('today_menu', JSON.stringify(menuData));
+            }
+
+            showNotification(`Menu saved successfully for ${date}`, 'success');
+            loadSavedMenus();
+            
+            // Ask if user wants to view the menu
+            if (confirm('Menu saved! Do you want to view it in the menu page?')) {
+                window.location.href = `menu.html?date=${date}`;
+            }
+        }
+
+        // ===== DELETE MENU =====
+        function deleteMenu() {
+            const date = document.getElementById('menuDate').value;
+            
+            if (!date) {
+                alert('Please select a date first');
+                return;
+            }
+
+            if (confirm(`Are you sure you want to delete the menu for ${date}?`)) {
+                const savedMenus = JSON.parse(localStorage.getItem('saved_menus')) || {};
+                
+                if (savedMenus[date]) {
+                    delete savedMenus[date];
+                    localStorage.setItem('saved_menus', JSON.stringify(savedMenus));
+                    
+                    // Clear form
+                    document.getElementById('breakfastVeg').value = '';
+                    document.getElementById('breakfastNonVeg').value = '';
+                    document.getElementById('lunchVeg').value = '';
+                    document.getElementById('lunchNonVeg').value = '';
+                    document.getElementById('dinnerVeg').value = '';
+                    document.getElementById('dinnerNonVeg').value = '';
+                    
+                    showNotification('Menu deleted successfully', 'success');
+                    loadSavedMenus();
+                } else {
+                    alert('No menu found for this date');
+                }
+            }
+        }
+
+        // ===== VIEW TODAY'S MENU =====
+        function viewTodayMenu() {
+            const today = new Date().toISOString().split('T')[0];
+            window.location.href = `menu.html?date=${today}`;
+        }
+
+        // ===== LOAD SAVED MENUS =====
+        function loadSavedMenus() {
+            const savedMenus = JSON.parse(localStorage.getItem('saved_menus')) || {};
+            const menuList = document.getElementById('menuList');
+            
+            if (Object.keys(savedMenus).length === 0) {
+                menuList.innerHTML = '<p style="color: #9ca3af; text-align: center;">No menus saved yet.</p>';
+                return;
+            }
+
+            let html = '';
+            // Sort by date (newest first)
+            const sortedDates = Object.keys(savedMenus).sort().reverse();
+            
+            sortedDates.forEach(date => {
+                const menu = savedMenus[date];
+                let totalItems = 0;
+                
+                if (menu.items) {
+                    totalItems = menu.items.length;
+                } else {
+                    // Count items from the stored format
+                    if (menu.breakfast) {
+                        if (menu.breakfast.veg) totalItems += menu.breakfast.veg.split(',').length;
+                        if (menu.breakfast.nonveg) totalItems += menu.breakfast.nonveg.split(',').length;
+                    }
+                    if (menu.lunch) {
+                        if (menu.lunch.veg) totalItems += menu.lunch.veg.split(',').length;
+                        if (menu.lunch.nonveg) totalItems += menu.lunch.nonveg.split(',').length;
+                    }
+                    if (menu.dinner) {
+                        if (menu.dinner.veg) totalItems += menu.dinner.veg.split(',').length;
+                        if (menu.dinner.nonveg) totalItems += menu.dinner.nonveg.split(',').length;
+                    }
+                }
+
+                html += `
+                    <div class="menu-item-preview">
+                        <div>
+                            <span class="date">${date}</span>
+                            <span class="items-count">(${totalItems} items)</span>
+                        </div>
+                        <div class="actions">
+                            <button class="edit-btn" onclick="loadMenuForEdit('${date}')">✏️ Edit</button>
+                            <button class="delete-btn" onclick="deleteSavedMenu('${date}')">🗑️ Delete</button>
+                            <button class="edit-btn" onclick="viewMenu('${date}')" style="background: #4f46e5; color: white;">👁️ View</button>
+                        </div>
+                    </div>
+                `;
+            });
+
+            menuList.innerHTML = html;
+        }
+
+        // ===== LOAD MENU FOR EDIT =====
+        function loadMenuForEdit(date) {
+            const savedMenus = JSON.parse(localStorage.getItem('saved_menus')) || {};
+            const menu = savedMenus[date];
+            
+            if (menu) {
+                document.getElementById('menuDate').value = date;
+                
+                if (menu.breakfast) {
+                    document.getElementById('breakfastVeg').value = menu.breakfast.veg || '';
+                    document.getElementById('breakfastNonVeg').value = menu.breakfast.nonveg || '';
+                    document.getElementById('lunchVeg').value = menu.lunch.veg || '';
+                    document.getElementById('lunchNonVeg').value = menu.lunch.nonveg || '';
+                    document.getElementById('dinnerVeg').value = menu.dinner.veg || '';
+                    document.getElementById('dinnerNonVeg').value = menu.dinner.nonveg || '';
+                } else if (menu.items) {
+                    // Reconstruct from items array
+                    let breakfastVeg = [];
+                    let breakfastNonVeg = [];
+                    let lunchVeg = [];
+                    let lunchNonVeg = [];
+                    let dinnerVeg = [];
+                    let dinnerNonVeg = [];
+                    
+                    menu.items.forEach(item => {
+                        const dish = item.text.replace(/\[(Breakfast|Lunch|Dinner|VEG|NONVEG)\]/g, '').trim();
+                        
+                        if (item.meal === 'breakfast') {
+                            if (item.type === 'veg') breakfastVeg.push(dish);
+                            else breakfastNonVeg.push(dish);
+                        } else if (item.meal === 'lunch') {
+                            if (item.type === 'veg') lunchVeg.push(dish);
+                            else lunchNonVeg.push(dish);
+                        } else if (item.meal === 'dinner') {
+                            if (item.type === 'veg') dinnerVeg.push(dish);
+                            else dinnerNonVeg.push(dish);
+                        }
+                    });
+                    
+                    document.getElementById('breakfastVeg').value = breakfastVeg.join(', ');
+                    document.getElementById('breakfastNonVeg').value = breakfastNonVeg.join(', ');
+                    document.getElementById('lunchVeg').value = lunchVeg.join(', ');
+                    document.getElementById('lunchNonVeg').value = lunchNonVeg.join(', ');
+                    document.getElementById('dinnerVeg').value = dinnerVeg.join(', ');
+                    document.getElementById('dinnerNonVeg').value = dinnerNonVeg.join(', ');
+                }
+                
+                showNotification('Menu loaded for editing', 'success');
+            }
+        }
+
+        // ===== DELETE SAVED MENU =====
+        function deleteSavedMenu(date) {
+            if (confirm(`Are you sure you want to delete the menu for ${date}?`)) {
+                const savedMenus = JSON.parse(localStorage.getItem('saved_menus')) || {};
+                
+                if (savedMenus[date]) {
+                    delete savedMenus[date];
+                    localStorage.setItem('saved_menus', JSON.stringify(savedMenus));
+                    
+                    showNotification('Menu deleted successfully', 'success');
+                    loadSavedMenus();
+                }
+            }
+        }
+
+        // ===== VIEW MENU =====
+        function viewMenu(date) {
+            window.location.href = `menu.html?date=${date}`;
+        }
+    </script>
+</body>
+</html>

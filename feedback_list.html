@@ -1,0 +1,1044 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>All Feedback - Hostel Mess</title>
+    
+    <!-- STRICT LOGIN PROTECTION -->
+    <script>
+        (function() {
+            if (window.performance && window.performance.navigation.type === window.performance.navigation.TYPE_BACK_FORWARD) {
+                window.location.replace('login.html');
+                return;
+            }
+        })();
+    </script>
+
+    <script>
+        (function () {
+            document.documentElement.style.visibility = 'hidden';
+            const studentLoggedIn = sessionStorage.getItem('studentLoggedIn') === 'true' || localStorage.getItem('studentLoggedIn') === 'true';
+            const staffLoggedIn = sessionStorage.getItem('staffLoggedIn') === 'true' || localStorage.getItem('staffLoggedIn') === 'true';
+
+            if (!studentLoggedIn && !staffLoggedIn) {
+                window.location.replace('login.html');
+                return;
+            }
+
+            document.documentElement.style.visibility = 'visible';
+        })();
+    </script>
+
+    <!-- BACK BUTTON PREVENTION -->
+    <script>
+        (function() {
+            window.addEventListener('pageshow', function(event) {
+                if (event.persisted) {
+                    const studentLoggedIn = sessionStorage.getItem('studentLoggedIn') === 'true' || localStorage.getItem('studentLoggedIn') === 'true';
+                    const staffLoggedIn = sessionStorage.getItem('staffLoggedIn') === 'true' || localStorage.getItem('staffLoggedIn') === 'true';
+                    
+                    if (!studentLoggedIn && !staffLoggedIn) {
+                        window.location.replace('login.html');
+                    }
+                }
+            });
+
+            history.pushState(null, null, location.href);
+            window.onpopstate = function() {
+                history.pushState(null, null, location.href);
+            };
+        })();
+    </script>
+
+    <!-- PREVENT PAGE CACHING -->
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate, max-age=0">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #f1f5f9;
+            color: #1e293b;
+            padding: 20px;
+        }
+
+        .header {
+            background: #1a1a1a;
+            color: white;
+            padding: 15px 30px;
+            margin-bottom: 30px;
+            border-radius: 8px;
+        }
+
+        .header h1 {
+            color: #ff4444;
+            margin-bottom: 10px;
+            font-size: 24px;
+        }
+
+        .nav {
+            display: flex;
+            gap: 20px;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+
+        .nav a {
+            color: #ddd;
+            text-decoration: none;
+            padding: 5px 10px;
+            border-radius: 4px;
+            transition: all 0.3s;
+            font-size: 14px;
+        }
+
+        .nav a:hover {
+            color: #ff4444;
+            background: rgba(255,255,255,0.1);
+        }
+
+        .nav a.active {
+            color: #ff4444;
+            background: rgba(255,68,68,0.1);
+            font-weight: bold;
+        }
+
+        .staff-login-btn {
+            background: #ff4444;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 13px;
+            font-weight: 600;
+            margin-left: auto;
+            text-decoration: none;
+            transition: all 0.3s;
+        }
+
+        .staff-login-btn:hover {
+            background: #cc0000;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(255,68,68,0.3);
+        }
+
+        .staff-badge {
+            background: #ff4444;
+            color: white;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            margin-left: 10px;
+            display: inline-block;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .card {
+            background: white;
+            border-radius: 10px;
+            padding: 25px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .card h2 {
+            color: #333;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 22px;
+        }
+
+        .stats-bar {
+            display: flex;
+            gap: 20px;
+            margin-bottom: 25px;
+            flex-wrap: wrap;
+        }
+
+        .stat-box {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 15px 25px;
+            border-radius: 8px;
+            min-width: 150px;
+            flex: 1;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
+        .stat-box .label {
+            font-size: 12px;
+            opacity: 0.9;
+            margin-bottom: 5px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .stat-box .value {
+            font-size: 28px;
+            font-weight: bold;
+        }
+
+        .search-section {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+
+        .search-box {
+            flex: 2;
+            min-width: 300px;
+            position: relative;
+        }
+
+        .search-box input {
+            width: 100%;
+            padding: 12px 15px 12px 45px;
+            border: 2px solid #e2e8f0;
+            border-radius: 8px;
+            font-size: 14px;
+            outline: none;
+            transition: all 0.3s;
+        }
+
+        .search-box input:focus {
+            border-color: #ff4444;
+            box-shadow: 0 0 0 3px rgba(255,68,68,0.1);
+        }
+
+        .search-box::before {
+            content: '🔍';
+            position: absolute;
+            left: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 16px;
+            color: #999;
+        }
+
+        .filter-group {
+            flex: 1;
+            display: flex;
+            gap: 10px;
+            min-width: 300px;
+        }
+
+        .filter-select {
+            flex: 1;
+            padding: 12px 15px;
+            border: 2px solid #e2e8f0;
+            border-radius: 8px;
+            font-size: 14px;
+            outline: none;
+            background: white;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .filter-select:focus {
+            border-color: #ff4444;
+            box-shadow: 0 0 0 3px rgba(255,68,68,0.1);
+        }
+
+        .export-buttons {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+
+        .export-btn {
+            padding: 10px 20px;
+            background: #28a745;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.3s;
+        }
+
+        .export-btn:hover {
+            background: #218838;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(40,167,69,0.3);
+        }
+
+        .export-btn.csv {
+            background: #17a2b8;
+        }
+
+        .export-btn.csv:hover {
+            background: #138496;
+        }
+
+        .table-container {
+            overflow-x: auto;
+            border-radius: 8px;
+            border: 1px solid #e2e8f0;
+            margin-bottom: 20px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            min-width: 1300px;
+        }
+
+        th {
+            background: #1e293b;
+            color: white;
+            padding: 15px 12px;
+            text-align: left;
+            font-size: 13px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        td {
+            padding: 12px;
+            border-bottom: 1px solid #e2e8f0;
+            font-size: 14px;
+        }
+
+        tr:hover td {
+            background: #f8fafc;
+        }
+
+        tr:last-child td {
+            border-bottom: none;
+        }
+
+        .rating-badge {
+            display: inline-block;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-weight: 600;
+            text-align: center;
+            min-width: 40px;
+            font-size: 12px;
+        }
+
+        .rating-badge.high {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .rating-badge.medium {
+            background: #fff3cd;
+            color: #856404;
+            border: 1px solid #ffeeba;
+        }
+
+        .rating-badge.low {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        .comment-cell {
+            max-width: 200px;
+        }
+
+        .comment-preview {
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            color: #4a5568;
+            margin-bottom: 4px;
+            font-size: 13px;
+        }
+
+        .view-link {
+            color: #007bff;
+            text-decoration: none;
+            font-size: 11px;
+            font-weight: 600;
+        }
+
+        .view-link:hover {
+            text-decoration: underline;
+            color: #0056b3;
+        }
+
+        .delete-btn {
+            background: #dc3545;
+            color: white;
+            border: none;
+            padding: 6px 12px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 12px;
+            font-weight: 600;
+            transition: all 0.3s;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .delete-btn:hover {
+            background: #c82333;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(220,53,69,0.3);
+        }
+
+        .pagination {
+            display: flex;
+            justify-content: center;
+            gap: 8px;
+            margin-top: 25px;
+            flex-wrap: wrap;
+        }
+
+        .page-btn {
+            padding: 8px 14px;
+            border: 1px solid #dee2e6;
+            background: white;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-size: 14px;
+            min-width: 40px;
+        }
+
+        .page-btn:hover:not(:disabled) {
+            background: #ff4444;
+            color: white;
+            border-color: #ff4444;
+        }
+
+        .page-btn.active {
+            background: #ff4444;
+            color: white;
+            border-color: #ff4444;
+        }
+
+        .page-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .alert {
+            padding: 15px 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            display: none;
+            align-items: center;
+            gap: 10px;
+            font-size: 14px;
+            font-weight: 500;
+        }
+
+        .alert.show {
+            display: flex;
+            animation: slideIn 0.3s ease;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .alert-success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .alert-danger {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 50px;
+            color: #94a3b8;
+        }
+
+        .empty-state svg {
+            width: 80px;
+            height: 80px;
+            margin-bottom: 15px;
+            color: #cbd5e1;
+        }
+
+        .empty-state h3 {
+            color: #1e293b;
+            margin-bottom: 8px;
+        }
+
+        .empty-state p {
+            margin-bottom: 20px;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #64748b;
+        }
+
+        .spinner {
+            width: 40px;
+            height: 40px;
+            border: 4px solid #f1f5f9;
+            border-top: 4px solid #f43f5e;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 15px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        @media (max-width: 768px) {
+            body {
+                padding: 10px;
+            }
+
+            .header {
+                padding: 15px;
+            }
+
+            .nav {
+                gap: 10px;
+            }
+
+            .nav a {
+                padding: 5px 8px;
+                font-size: 12px;
+            }
+
+            .stats-bar {
+                flex-direction: column;
+                gap: 10px;
+            }
+
+            .stat-box {
+                width: 100%;
+            }
+
+            .search-section {
+                flex-direction: column;
+            }
+
+            .filter-group {
+                flex-direction: column;
+                min-width: auto;
+            }
+
+            .export-buttons {
+                flex-direction: column;
+            }
+
+            .pagination {
+                gap: 5px;
+            }
+
+            .page-btn {
+                padding: 6px 10px;
+                font-size: 12px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="header">
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+            <div>
+                <h1>🏨 Hostel Mess Management System</h1>
+                <div class="nav">
+                    <a href="index.html">🏠 Home</a>
+                    <a href="register.html">📝 Register</a>
+                    <a href="staff.html">👨‍🍳 Staff</a>
+                    <a href="mess_entry_ui.html">🍽️ Meals</a>
+                    <a href="menu.html">📋 Menu</a>
+                    <a href="account_entry.html">💬 Give Feedback</a>
+                    <a href="feedback_list.html" class="active">📊 All Feedback</a>
+                    <a href="feedback_report.html">📈 Report</a>
+                    <span id="staffBadge" class="staff-badge" style="display: none;">Staff Mode</span>
+                </div>
+            </div>
+            <a href="staff_login.html" class="staff-login-btn">👤 Staff Login</a>
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="card">
+            <h2>📊 All Staff Feedback</h2>
+
+            <div id="alertMessage" class="alert"></div>
+
+            <div style="margin-bottom: 20px;">
+                <button onclick="loadFeedbackData()" style="padding: 10px 20px; background: #28a745; color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: 600;">
+                    🔄 Refresh Feedback List
+                </button>
+            </div>
+
+            <div class="stats-bar" id="statsBar">
+                <div class="stat-box">
+                    <div class="label">Total Feedback</div>
+                    <div class="value" id="totalCount">0</div>
+                </div>
+                <div class="stat-box">
+                    <div class="label">Avg Quality</div>
+                    <div class="value" id="avgQuality">0.0</div>
+                </div>
+                <div class="stat-box">
+                    <div class="label">Avg Hygiene</div>
+                    <div class="value" id="avgHygiene">0.0</div>
+                </div>
+                <div class="stat-box">
+                    <div class="label">Avg Service</div>
+                    <div class="value" id="avgService">0.0</div>
+                </div>
+                <div class="stat-box">
+                    <div class="label">Avg Overall</div>
+                    <div class="value" id="avgOverall">0.0</div>
+                </div>
+            </div>
+
+            <div class="search-section">
+                <div class="search-box">
+                    <input type="text" id="searchInput" placeholder="Search by staff name, role, student account, comments..." onkeyup="filterFeedback()">
+                </div>
+                <div class="filter-group">
+                    <select id="staffFilter" class="filter-select" onchange="filterFeedback()">
+                        <option value="all">All Staff Members</option>
+                    </select>
+                    <select id="ratingFilter" class="filter-select" onchange="filterFeedback()">
+                        <option value="all">All Ratings</option>
+                        <option value="5">★★★★★ (5 Stars)</option>
+                        <option value="4">★★★★☆ (4 Stars)</option>
+                        <option value="3">★★★☆☆ (3 Stars)</option>
+                        <option value="2">★★☆☆☆ (2 Stars)</option>
+                        <option value="1">★☆☆☆☆ (1 Star)</option>
+                    </select>
+                    <select id="sortFilter" class="filter-select" onchange="filterFeedback()">
+                        <option value="newest">🆕 Newest First</option>
+                        <option value="oldest">📅 Oldest First</option>
+                        <option value="highest">⬆️ Highest Rated</option>
+                        <option value="lowest">⬇️ Lowest Rated</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="export-buttons">
+                <button class="export-btn" onclick="exportToCSV()">
+                    📥 Export to CSV
+                </button>
+                <button class="export-btn csv" onclick="printReport()">
+                    🖨️ Print Report
+                </button>
+            </div>
+
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>Staff Name</th>
+                            <th>Role</th>
+                            <th>Quality</th>
+                            <th>Hygiene</th>
+                            <th>Service</th>
+                            <th>Staff Rating</th>
+                            <th>Overall</th>
+                            <th>Comments</th>
+                            <th>Student</th>
+                            <th>Date & Time</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody id="feedbackTableBody">
+                        <tr>
+                            <td colspan="12" class="loading">
+                                <div class="spinner"></div>
+                                <p>Loading feedback...</p>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="pagination" id="pagination"></div>
+        </div>
+    </div>
+
+    <script>
+        let feedbackData = [];
+        let filteredData = [];
+        let currentPage = 1;
+        const itemsPerPage = 15;
+
+        const isStaff = sessionStorage.getItem('staffLoggedIn') === 'true' || localStorage.getItem('staffLoggedIn') === 'true';
+        
+        if (isStaff) {
+            document.getElementById('staffBadge').style.display = 'inline-block';
+        }
+
+        window.addEventListener('load', function() {
+            loadFeedbackData();
+        });
+
+        async function loadFeedbackData() {
+            document.getElementById('feedbackTableBody').innerHTML = `
+                <tr>
+                    <td colspan="12" class="loading">
+                        <div class="spinner"></div>
+                        <p>Loading feedback...</p>
+                    </td>
+                </tr>
+            `;
+
+            try {
+                const response = await fetch('staff_api.php?action=get_feedback');
+                const result = await response.json();
+                
+                if (result.success) {
+                    feedbackData = result.data;
+                    
+                    if (feedbackData.length === 0) {
+                        document.getElementById('feedbackTableBody').innerHTML = `
+                            <tr>
+                                <td colspan="12" class="empty-state">
+                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+                                    </svg>
+                                    <h3>No Feedback Yet</h3>
+                                    <p>No feedback has been submitted yet.</p>
+                                </td>
+                            </tr>
+                        `;
+                        document.getElementById('pagination').innerHTML = '';
+                        updateStats();
+                        return;
+                    }
+                    
+                    loadStaffFilter();
+                    filterFeedback();
+                    updateStats();
+                } else {
+                    throw new Error(result.message);
+                }
+            } catch (error) {
+                console.error('Error loading feedback:', error);
+                document.getElementById('feedbackTableBody').innerHTML = `
+                    <tr>
+                        <td colspan="12" class="empty-state">
+                            <h3>Error Loading Feedback</h3>
+                            <p>Could not load feedback data. Please try again.</p>
+                        </td>
+                    </tr>
+                `;
+            }
+        }
+
+        function loadStaffFilter() {
+            const staffFilter = document.getElementById('staffFilter');
+            while (staffFilter.options.length > 1) {
+                staffFilter.remove(1);
+            }
+            
+            const uniqueStaff = [...new Set(feedbackData.map(f => f.staffName).filter(name => name))];
+            
+            uniqueStaff.sort().forEach(staff => {
+                const option = document.createElement('option');
+                option.value = staff;
+                option.textContent = staff;
+                staffFilter.appendChild(option);
+            });
+        }
+
+        function filterFeedback() {
+            const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+            const staffFilter = document.getElementById('staffFilter').value;
+            const ratingFilter = document.getElementById('ratingFilter').value;
+            const sortFilter = document.getElementById('sortFilter').value;
+
+            filteredData = feedbackData.filter(f => {
+                const matchesSearch = searchTerm === '' || 
+                    (f.staffName && f.staffName.toLowerCase().includes(searchTerm)) ||
+                    (f.staffRole && f.staffRole.toLowerCase().includes(searchTerm)) ||
+                    (f.studentAccount && f.studentAccount.toLowerCase().includes(searchTerm)) ||
+                    (f.account && f.account.toLowerCase().includes(searchTerm)) ||
+                    (f.comments && f.comments.toLowerCase().includes(searchTerm));
+
+                const matchesStaff = staffFilter === 'all' || f.staffName === staffFilter;
+
+                const parseRating = (val) => Math.min(5, Math.max(0, parseInt(val) || 0));
+                const avgRating = (parseRating(f.quality) + parseRating(f.hygiene) + parseRating(f.service) + parseRating(f.rating)) / 4;
+                const matchesRating = ratingFilter === 'all' || 
+                    (ratingFilter === '5' && avgRating >= 4.5) ||
+                    (ratingFilter === '4' && avgRating >= 3.5 && avgRating < 4.5) ||
+                    (ratingFilter === '3' && avgRating >= 2.5 && avgRating < 3.5) ||
+                    (ratingFilter === '2' && avgRating >= 1.5 && avgRating < 2.5) ||
+                    (ratingFilter === '1' && avgRating < 1.5);
+
+                return matchesSearch && matchesStaff && matchesRating;
+            });
+
+            filteredData.sort((a, b) => {
+                const parseRating = (val) => Math.min(5, Math.max(0, parseInt(val) || 0));
+                const dateA = new Date(a.date || a.timestamp || 0);
+                const dateB = new Date(b.date || b.timestamp || 0);
+                const avgA = (parseRating(a.quality) + parseRating(a.hygiene) + parseRating(a.service) + parseRating(a.rating)) / 4;
+                const avgB = (parseRating(b.quality) + parseRating(b.hygiene) + parseRating(b.service) + parseRating(b.rating)) / 4;
+
+                switch(sortFilter) {
+                    case 'newest':
+                        return dateB - dateA;
+                    case 'oldest':
+                        return dateA - dateB;
+                    case 'highest':
+                        return avgB - avgA;
+                    case 'lowest':
+                        return avgA - avgB;
+                    default:
+                        return dateB - dateA;
+                }
+            });
+
+            currentPage = 1;
+            renderTable();
+            updateStats();
+        }
+
+        function renderTable() {
+            const tbody = document.getElementById('feedbackTableBody');
+            
+            if (filteredData.length === 0) {
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="12" style="text-align: center; padding: 50px; color: #94a3b8;">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="80" height="80" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" style="margin-bottom: 15px; color: #cbd5e1;">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                            </svg>
+                            <h3 style="color: #1e293b; margin-bottom: 8px;">No Feedback Found</h3>
+                            <p>No feedback matches your filters.</p>
+                        </td>
+                    </tr>
+                `;
+                document.getElementById('pagination').innerHTML = '';
+                return;
+            }
+
+            const start = (currentPage - 1) * itemsPerPage;
+            const end = start + itemsPerPage;
+            const pageData = filteredData.slice(start, end);
+
+            tbody.innerHTML = pageData.map((f, index) => {
+                // Ensure all values are numbers and capped at 5
+                const quality = Math.min(5, Math.max(0, parseInt(f.quality) || 0));
+                const hygiene = Math.min(5, Math.max(0, parseInt(f.hygiene) || 0));
+                const service = Math.min(5, Math.max(0, parseInt(f.service) || 0));
+                const rating = Math.min(5, Math.max(0, parseInt(f.rating) || 0));
+                
+                const avgOverall = (quality + hygiene + service + rating) / 4;
+                const avgClass = avgOverall >= 4 ? 'high' : avgOverall >= 3 ? 'medium' : 'low';
+                const commentPreview = f.comments ? f.comments.substring(0, 30) + (f.comments.length > 30 ? '...' : '') : '—';
+                
+                return `
+                    <tr>
+                        <td><strong>${start + index + 1}</strong></td>
+                        <td><strong>${escapeHtml(f.staffName || 'N/A')}</strong></td>
+                        <td>${escapeHtml(f.staffRole || 'N/A')}</td>
+                        <td><span class="rating-badge ${quality >= 4 ? 'high' : quality >= 3 ? 'medium' : 'low'}">${quality}</span></td>
+                        <td><span class="rating-badge ${hygiene >= 4 ? 'high' : hygiene >= 3 ? 'medium' : 'low'}">${hygiene}</span></td>
+                        <td><span class="rating-badge ${service >= 4 ? 'high' : service >= 3 ? 'medium' : 'low'}">${service}</span></td>
+                        <td><span class="rating-badge ${rating >= 4 ? 'high' : rating >= 3 ? 'medium' : 'low'}">${rating}</span></td>
+                        <td><span class="rating-badge ${avgClass}">${avgOverall.toFixed(1)}★</span></td>
+                        <td class="comment-cell">
+                            <div class="comment-preview">${escapeHtml(commentPreview)}</div>
+                            ${f.comments ? `<a href="feedback_detail.html?id=${f.id}" class="view-link">View Full</a>` : ''}
+                        </td>
+                        <td>${escapeHtml(f.studentAccount || f.account || 'N/A')}</td>
+                        <td>${f.date || f.timestamp ? new Date(f.date || f.timestamp).toLocaleString() : 'N/A'}</td>
+                        <td>
+                            <button class="delete-btn" onclick="deleteFeedback('${f.id}')">
+                                🗑️ Delete
+                            </button>
+                        </td>
+                    </tr>
+                `;
+            }).join('');
+
+            renderPagination();
+        }
+
+        function renderPagination() {
+            const totalPages = Math.ceil(filteredData.length / itemsPerPage);
+            const pagination = document.getElementById('pagination');
+            
+            if (totalPages <= 1) {
+                pagination.innerHTML = '';
+                return;
+            }
+
+            let html = '';
+            
+            html += `<button class="page-btn" onclick="changePage(${currentPage - 1})" ${currentPage === 1 ? 'disabled' : ''}>◀</button>`;
+            
+            for (let i = 1; i <= totalPages; i++) {
+                if (i === 1 || i === totalPages || (i >= currentPage - 2 && i <= currentPage + 2)) {
+                    html += `<button class="page-btn ${i === currentPage ? 'active' : ''}" onclick="changePage(${i})">${i}</button>`;
+                } else if (i === currentPage - 3 || i === currentPage + 3) {
+                    html += `<span class="page-btn" style="border: none; background: none; cursor: default;">...</span>`;
+                }
+            }
+            
+            html += `<button class="page-btn" onclick="changePage(${currentPage + 1})" ${currentPage === totalPages ? 'disabled' : ''}>▶</button>`;
+            
+            pagination.innerHTML = html;
+        }
+
+        function changePage(page) {
+            const totalPages = Math.ceil(filteredData.length / itemsPerPage);
+            if (page < 1 || page > totalPages) return;
+            currentPage = page;
+            renderTable();
+            document.querySelector('.table-container').scrollIntoView({ behavior: 'smooth' });
+        }
+
+        async function deleteFeedback(id) {
+            if (confirm('⚠️ Are you sure you want to delete this feedback?\nThis action cannot be undone.')) {
+                try {
+                    const response = await fetch('staff_api.php?action=delete_feedback&id=' + id);
+                    const result = await response.json();
+                    
+                    if (result.success) {
+                        showAlert('Feedback deleted successfully!', 'success');
+                        loadFeedbackData();
+                    } else {
+                        showAlert('Error deleting feedback: ' + result.message, 'danger');
+                    }
+                } catch (error) {
+                    console.error('Error deleting feedback:', error);
+                    showAlert('Error deleting feedback. Please try again.', 'danger');
+                }
+            }
+        }
+
+        function updateStats() {
+            const total = filteredData.length;
+            
+            if (total === 0) {
+                document.getElementById('totalCount').textContent = '0';
+                document.getElementById('avgQuality').textContent = '0.0';
+                document.getElementById('avgHygiene').textContent = '0.0';
+                document.getElementById('avgService').textContent = '0.0';
+                document.getElementById('avgOverall').textContent = '0.0';
+                return;
+            }
+
+            // Helper to parse and cap ratings at 5
+            const parseRating = (val) => Math.min(5, Math.max(0, parseInt(val) || 0));
+
+            const sumQuality = filteredData.reduce((sum, f) => sum + parseRating(f.quality), 0);
+            const sumHygiene = filteredData.reduce((sum, f) => sum + parseRating(f.hygiene), 0);
+            const sumService = filteredData.reduce((sum, f) => sum + parseRating(f.service), 0);
+            const sumOverall = filteredData.reduce((sum, f) => {
+                const avg = (parseRating(f.quality) + parseRating(f.hygiene) + parseRating(f.service) + parseRating(f.rating)) / 4;
+                return sum + avg;
+            }, 0);
+
+            document.getElementById('totalCount').textContent = total;
+            document.getElementById('avgQuality').textContent = (sumQuality / total).toFixed(1);
+            document.getElementById('avgHygiene').textContent = (sumHygiene / total).toFixed(1);
+            document.getElementById('avgService').textContent = (sumService / total).toFixed(1);
+            document.getElementById('avgOverall').textContent = (sumOverall / total).toFixed(1);
+        }
+
+        function exportToCSV() {
+            const headers = ['ID', 'Staff Name', 'Role', 'Quality', 'Hygiene', 'Service', 'Staff Rating', 'Overall', 'Comments', 'Student Account', 'Date'];
+            const csvRows = [];
+            
+            csvRows.push(headers.join(','));
+            
+            filteredData.forEach((f, index) => {
+                const avgOverall = ((f.quality || 0) + (f.hygiene || 0) + (f.service || 0) + (f.rating || 0)) / 4;
+                const row = [
+                    index + 1,
+                    `"${f.staffName || ''}"`,
+                    `"${f.staffRole || ''}"`,
+                    f.quality || 0,
+                    f.hygiene || 0,
+                    f.service || 0,
+                    f.rating || 0,
+                    avgOverall.toFixed(1),
+                    `"${(f.comments || '').replace(/"/g, '""')}"`,
+                    `"${f.studentAccount || f.account || ''}"`,
+                    `"${f.date || f.timestamp || ''}"`
+                ];
+                csvRows.push(row.join(','));
+            });
+
+            const csvString = csvRows.join('\n');
+            const blob = new Blob([csvString], { type: 'text/csv;charset=utf-8;' });
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `feedback_report_${new Date().toISOString().split('T')[0]}.csv`;
+            a.click();
+            window.URL.revokeObjectURL(url);
+            
+            showAlert('Report exported successfully!', 'success');
+        }
+
+        function printReport() {
+            window.print();
+        }
+
+        function showAlert(message, type) {
+            const alert = document.getElementById('alertMessage');
+            alert.textContent = message;
+            alert.className = `alert alert-${type} show`;
+            
+            setTimeout(() => {
+                alert.classList.remove('show');
+            }, 3000);
+        }
+
+        function escapeHtml(str) {
+            if (!str) return '';
+            return String(str)
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#039;');
+        }
+    </script>
+</body>
+</html>

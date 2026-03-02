@@ -1,0 +1,841 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mess Entry & Meal Tracking</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Segoe UI', sans-serif;
+            background: #f1f5f9;
+            color: #1e293b;
+            padding-top: 10px;
+        }
+
+        /* ===== HEADER ===== */
+        .header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            background: rgba(12, 18, 28, 0.97);
+            padding: 16px 40px;
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
+            z-index: 1000;
+        }
+
+        .header-content {
+            display: flex;
+            align-items: center;
+            gap: 24px;
+            justify-content: space-between;
+        }
+
+        .header-logo {
+            width: 64px;
+            height: 64px;
+            border-radius: 50%;
+            background: #ffffff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+
+        .header-logo img {
+            width: 42px;
+            height: 42px;
+            border-radius: 50%;
+            object-fit: cover;
+        }
+
+        .header-title {
+            font-size: 1.8rem;
+            font-weight: 800;
+            background: linear-gradient(90deg, #f43f5e, #fb7185, #fda4af);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .navbar {
+            margin-top: 6px;
+            display: flex;
+            gap: 22px;
+            align-items: center;
+        }
+
+        .navbar a {
+            position: relative;
+            color: #d1d5db;
+            text-decoration: none;
+            font-size: 0.88rem;
+            font-weight: 600;
+            transition: color 0.25s;
+        }
+
+        .navbar a:hover {
+            color: #f43f5e;
+        }
+
+        .navbar a::after {
+            content: "";
+            position: absolute;
+            left: 0;
+            bottom: -6px;
+            width: 0;
+            height: 2px;
+            background: #f43f5e;
+            transition: width 0.25s;
+        }
+
+        .navbar a:hover::after {
+            width: 100%;
+        }
+
+        /* ===== CONTAINER ===== */
+        .container {
+            max-width: 1200px;
+            margin: 120px auto 40px;
+            padding: 0 20px;
+        }
+
+        /* ===== CARD ===== */
+        .card {
+            background: #ffffff;
+            border-radius: 18px;
+            padding: 30px;
+            box-shadow: 0 12px 36px rgba(0, 0, 0, 0.1);
+        }
+
+        .card h2 {
+            text-align: center;
+            margin-bottom: 30px;
+            color: #1e293b;
+            font-size: 2rem;
+        }
+
+        /* ===== SEARCH BOX ===== */
+        .search-box {
+            max-width: 600px;
+            margin: 0 auto 30px;
+        }
+
+        .search-input-group {
+            display: flex;
+            gap: 10px;
+        }
+
+        .search-input-group input {
+            flex: 1;
+            padding: 12px 16px;
+            border: 1px solid #cbd5e1;
+            border-radius: 8px;
+            font-size: 1rem;
+            outline: none;
+        }
+
+        .search-input-group input:focus {
+            border-color: #f43f5e;
+        }
+
+        .search-input-group button {
+            padding: 12px 24px;
+            background: #b3123c;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .search-input-group button:hover {
+            background: #9f0f35;
+        }
+
+        .message-hint {
+            color: #64748b;
+            font-size: 0.9rem;
+            margin-top: 8px;
+        }
+
+        /* ===== MESSAGE ===== */
+        .message {
+            padding: 12px 16px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            font-weight: 500;
+        }
+
+        .message.success {
+            background: #dcfce7;
+            color: #166534;
+            border: 1px solid #86efac;
+        }
+
+        .message.error {
+            background: #fee2e2;
+            color: #991b1b;
+            border: 1px solid #fca5a5;
+        }
+
+        .message.info {
+            background: #dbeafe;
+            color: #1e40af;
+            border: 1px solid #93c5fd;
+        }
+
+        /* ===== STUDENT INFO ===== */
+        .student-info {
+            background: linear-gradient(135deg, #0f172a, #1e293b);
+            color: white;
+            padding: 20px;
+            border-radius: 12px;
+            margin-bottom: 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        .student-info h3 {
+            font-size: 1.5rem;
+            margin-bottom: 5px;
+        }
+
+        .student-info p {
+            color: #cbd5e1;
+        }
+
+        .student-info .pref-badge {
+            background: #f43f5e;
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-weight: 600;
+        }
+
+        /* ===== STATS GRID ===== */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+
+        .stat-card {
+            background: #f8fafc;
+            padding: 15px;
+            border-radius: 8px;
+            text-align: center;
+            border: 1px solid #e2e8f0;
+        }
+
+        .stat-card .label {
+            font-size: 0.85rem;
+            color: #64748b;
+            margin-bottom: 8px;
+            font-weight: 500;
+        }
+
+        .stat-card .value {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #1e293b;
+            line-height: 1;
+        }
+
+        .stat-card .sub-value {
+            font-size: 0.8rem;
+            color: #94a3b8;
+            margin-top: 5px;
+        }
+
+        .stat-card.total {
+            background: linear-gradient(135deg, #0f172a, #1e293b);
+        }
+
+        .stat-card.total .label,
+        .stat-card.total .value,
+        .stat-card.total .sub-value {
+            color: white;
+        }
+
+        /* ===== MEAL BUTTONS ===== */
+        .meal-buttons {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+
+        .meal-btn {
+            padding: 20px;
+            border: none;
+            border-radius: 12px;
+            font-size: 1.2rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .meal-btn.breakfast {
+            background: #fef9c3;
+            color: #713f12;
+            border: 1px solid #fde68a;
+        }
+
+        .meal-btn.lunch {
+            background: #dbeafe;
+            color: #1e3a8a;
+            border: 1px solid #93c5fd;
+        }
+
+        .meal-btn.dinner {
+            background: #ede9fe;
+            color: #4c1d95;
+            border: 1px solid #c4b5fd;
+        }
+
+        .meal-btn:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        .meal-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        /* ===== FILTER TABS ===== */
+        .filter-tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+
+        .filter-tab {
+            padding: 8px 20px;
+            background: #f1f5f9;
+            border: 1px solid #e2e8f0;
+            border-radius: 30px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: all 0.2s;
+        }
+
+        .filter-tab:hover {
+            background: #e2e8f0;
+        }
+
+        .filter-tab.active {
+            background: #b3123c;
+            color: white;
+            border-color: #b3123c;
+        }
+
+        /* ===== TABLE ===== */
+        .table-container {
+            overflow-x: auto;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            margin-top: 20px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th {
+            background: #0f172a;
+            color: white;
+            padding: 12px;
+            text-align: left;
+            font-weight: 600;
+            font-size: 0.9rem;
+        }
+
+        td {
+            padding: 12px;
+            border-bottom: 1px solid #e2e8f0;
+        }
+
+        tr:hover td {
+            background: #f8fafc;
+        }
+
+        .meal-badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 600;
+        }
+
+        .meal-badge.breakfast {
+            background: #fef9c3;
+            color: #713f12;
+        }
+
+        .meal-badge.lunch {
+            background: #dbeafe;
+            color: #1e3a8a;
+        }
+
+        .meal-badge.dinner {
+            background: #ede9fe;
+            color: #4c1d95;
+        }
+
+        .date-badge {
+            background: #f1f5f9;
+            padding: 3px 8px;
+            border-radius: 4px;
+            font-size: 0.8rem;
+            color: #475569;
+        }
+
+        /* ===== PAGINATION ===== */
+        .pagination {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-top: 20px;
+            flex-wrap: wrap;
+        }
+
+        .page-btn {
+            padding: 8px 14px;
+            border: 1px solid #e2e8f0;
+            background: white;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .page-btn:hover {
+            background: #b3123c;
+            color: white;
+            border-color: #b3123c;
+        }
+
+        .page-btn.active {
+            background: #b3123c;
+            color: white;
+            border-color: #b3123c;
+        }
+
+        .page-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        /* ===== RESPONSIVE ===== */
+        @media (max-width: 768px) {
+            .header {
+                padding: 14px 16px;
+            }
+
+            .header-content {
+                flex-wrap: wrap;
+            }
+
+            .container {
+                margin-top: 160px;
+            }
+
+            .search-input-group {
+                flex-direction: column;
+            }
+
+            .stats-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .meal-buttons {
+                grid-template-columns: 1fr;
+            }
+
+            .student-info {
+                flex-direction: column;
+                text-align: center;
+            }
+
+            .filter-tabs {
+                justify-content: center;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- ===== HEADER ===== -->
+    <div class="header">
+        <div class="header-content">
+            <div class="header-logo">
+                <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='42' height='42' viewBox='0 0 24 24' fill='%23f43f5e'%3E%3Cpath d='M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z'/%3E%3C/svg%3E"
+                    alt="Hostel Logo">
+            </div>
+            <div class="header-text">
+                <h1 class="header-title">Hostel Mess Management</h1>
+                <nav class="navbar">
+                    <a href="index.html">Home</a>
+                    <a href="register.html">Register</a>
+                    <a href="mess_entry_ui.html" class="active">Meals-Tracking</a>
+                    <a href="menu.html">Menu</a>
+                    <a href="account_entry.html">Feedback</a>
+                </nav>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== MAIN CONTENT ===== -->
+    <div class="container">
+        <div class="card">
+            <h2>🍽️ Meal Entry & Complete History</h2>
+
+            <div class="search-box">
+                <div class="search-input-group">
+                    <input type="text" id="accountInput" placeholder="Enter account number (e.g., 541)"
+                        onkeypress="if(event.key==='Enter') searchStudent()">
+                    <button onclick="searchStudent()">Search / Verify</button>
+                </div>
+                <p class="message-hint">Press Enter or click Search to view complete meal history</p>
+            </div>
+
+            <div id="message"></div>
+
+            <div id="result" style="display: none;">
+                <div class="student-info" id="studentInfo"></div>
+
+                <!-- Overall Statistics -->
+                <div class="stats-grid" id="statsGrid"></div>
+
+                <!-- Filter Tabs -->
+                <div class="filter-tabs">
+                    <span class="filter-tab active" onclick="filterMeals('all')" id="filterAll">All Meals</span>
+                    <span class="filter-tab" onclick="filterMeals('breakfast')" id="filterBreakfast">Breakfast</span>
+                    <span class="filter-tab" onclick="filterMeals('lunch')" id="filterLunch">Lunch</span>
+                    <span class="filter-tab" onclick="filterMeals('dinner')" id="filterDinner">Dinner</span>
+                </div>
+
+                <!-- Complete Meal History Table -->
+                <h3 style="margin-bottom: 15px;">📋 Complete Meal History</h3>
+                <div class="table-container">
+                    <table id="historyTable">
+                        <thead>
+                            <tr>
+                                <th>#</th>
+                                <th>Date</th>
+                                <th>Meal Type</th>
+                                <th>Time</th>
+                                <th>Day</th>
+                            </tr>
+                        </thead>
+                        <tbody id="historyTableBody"></tbody>
+                    </table>
+                </div>
+
+                <!-- Pagination -->
+                <div class="pagination" id="pagination"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentStudent = null;
+        let allMeals = [];
+        let filteredMeals = [];
+        let currentPage = 1;
+        let currentFilter = 'all';
+        const itemsPerPage = 10;
+
+        async function searchStudent() {
+            const account = document.getElementById('accountInput').value.trim();
+            if (!account) {
+                showMessage('Please enter an account number', 'error');
+                return;
+            }
+            await loadStudentData(account);
+        }
+
+        async function loadStudentData(account) {
+            showMessage('Loading...', 'info');
+            document.getElementById('result').style.display = 'none';
+
+            try {
+                // First search for student
+                const res = await fetch(`api.php?action=search&account_number=${encodeURIComponent(account)}`);
+                const data = await res.json();
+
+                if (data.success) {
+                    currentStudent = data.data.student;
+                    
+                    // Fetch all meal history for this student
+                    const mealsRes = await fetch(`api.php?action=get_meals&account_number=${encodeURIComponent(account)}`);
+                    const mealsData = await mealsRes.json();
+                    
+                    if (mealsData.success) {
+                        // Convert database meals to our format
+                        allMeals = mealsData.data.meals.map(meal => {
+                            const mealDate = new Date(meal.meal_time);
+                            return {
+                                id: meal.id,
+                                type: meal.meal_type,
+                                date: mealDate.toLocaleDateString('en-US', { year: 'numeric', month: '2-digit', day: '2-digit' }),
+                                time: mealDate.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: true }),
+                                fullDate: mealDate,
+                                day: mealDate.toLocaleDateString('en-US', { weekday: 'long' })
+                            };
+                        });
+                    } else {
+                        allMeals = [];
+                    }
+
+                    showStudentInfo(currentStudent);
+                    updateStatistics();
+                    filterMeals('all');
+                    showMessage('Data loaded!', 'success');
+                } else {
+                    showMessage(data.errors?.[0] || 'Student not found', 'error');
+                }
+            } catch (err) {
+                showMessage('Error connecting to server: ' + err.message, 'error');
+            }
+        }
+
+        function generateMockMealHistory() {
+            const meals = [];
+            const today = new Date();
+
+            // Generate meals for the last 30 days
+            for (let i = 30; i >= 0; i--) {
+                const date = new Date(today);
+                date.setDate(date.getDate() - i);
+
+                // Randomly decide if meals were taken (80% chance)
+                if (Math.random() < 0.8) {
+                    meals.push({
+                        type: 'breakfast',
+                        date: date.toLocaleDateString('en-US', { year: 'numeric', month: '2-digit', day: '2-digit' }),
+                        time: '08:30 AM',
+                        fullDate: new Date(date),
+                        day: date.toLocaleDateString('en-US', { weekday: 'long' })
+                    });
+                }
+
+                if (Math.random() < 0.85) {
+                    meals.push({
+                        type: 'lunch',
+                        date: date.toLocaleDateString('en-US', { year: 'numeric', month: '2-digit', day: '2-digit' }),
+                        time: '12:45 PM',
+                        fullDate: new Date(date),
+                        day: date.toLocaleDateString('en-US', { weekday: 'long' })
+                    });
+                }
+
+                if (Math.random() < 0.75) {
+                    meals.push({
+                        type: 'dinner',
+                        date: date.toLocaleDateString('en-US', { year: 'numeric', month: '2-digit', day: '2-digit' }),
+                        time: '07:30 PM',
+                        fullDate: new Date(date),
+                        day: date.toLocaleDateString('en-US', { weekday: 'long' })
+                    });
+                }
+            }
+
+            // Sort by date (newest first)
+            return meals.sort((a, b) => b.fullDate - a.fullDate);
+        }
+
+        function showStudentInfo(student) {
+            document.getElementById('result').style.display = 'block';
+
+            document.getElementById('studentInfo').innerHTML = `
+                <div>
+                    <h3>${escapeHtml(student.full_name)}</h3>
+                    <p>🏨 ${escapeHtml(student.hostel_name || 'N/A')} | Room ${escapeHtml(student.room_number || 'N/A')}</p>
+                </div>
+                <div class="pref-badge">
+                    ${student.food_preference === 'veg' ? '🥬 Vegetarian' : '🍗 Non-Vegetarian'}
+                </div>
+            `;
+        }
+
+        function updateStatistics() {
+            const breakfastCount = allMeals.filter(m => m.type === 'breakfast').length;
+            const lunchCount = allMeals.filter(m => m.type === 'lunch').length;
+            const dinnerCount = allMeals.filter(m => m.type === 'dinner').length;
+            const totalMeals = allMeals.length;
+
+            // Get today's meals
+            const today = new Date().toLocaleDateString('en-US', { year: 'numeric', month: '2-digit', day: '2-digit' });
+            const todayMeals = allMeals.filter(m => m.date === today).length;
+
+            document.getElementById('statsGrid').innerHTML = `
+                <div class="stat-card">
+                    <div class="label">🍳 Breakfast</div>
+                    <div class="value">${breakfastCount}</div>
+                    <div class="sub-value">Total</div>
+                </div>
+                <div class="stat-card">
+                    <div class="label">🍛 Lunch</div>
+                    <div class="value">${lunchCount}</div>
+                    <div class="sub-value">Total</div>
+                </div>
+                <div class="stat-card">
+                    <div class="label">🍽️ Dinner</div>
+                    <div class="value">${dinnerCount}</div>
+                    <div class="sub-value">Total</div>
+                </div>
+                <div class="stat-card">
+                    <div class="label">📊 Today</div>
+                    <div class="value">${todayMeals}</div>
+                    <div class="sub-value">Meals</div>
+                </div>
+                <div class="stat-card total">
+                    <div class="label">🎯 All Time</div>
+                    <div class="value">${totalMeals}</div>
+                    <div class="sub-value">Total Meals</div>
+                </div>
+            `;
+        }
+
+        function filterMeals(type) {
+            currentFilter = type;
+            currentPage = 1;
+
+            // Update active tab
+            document.querySelectorAll('.filter-tab').forEach(tab => tab.classList.remove('active'));
+            document.getElementById(`filter${type.charAt(0).toUpperCase() + type.slice(1)}`).classList.add('active');
+
+            if (type === 'all') {
+                filteredMeals = [...allMeals];
+            } else {
+                filteredMeals = allMeals.filter(m => m.type === type);
+            }
+
+            renderTable();
+        }
+
+        function renderTable() {
+            const tbody = document.getElementById('historyTableBody');
+            const start = (currentPage - 1) * itemsPerPage;
+            const end = start + itemsPerPage;
+            const pageData = filteredMeals.slice(start, end);
+
+            if (pageData.length === 0) {
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="5" style="text-align: center; padding: 30px; color: #64748b;">
+                            No meals found for this filter
+                        </td>
+                    </tr>
+                `;
+            } else {
+                tbody.innerHTML = pageData.map((meal, index) => {
+                    const dateObj = new Date(meal.date);
+                    const formattedDate = dateObj.toLocaleDateString('en-US', {
+                        year: 'numeric',
+                        month: 'long',
+                        day: 'numeric'
+                    });
+
+                    return `
+                        <tr>
+                            <td>${start + index + 1}</td>
+                            <td>
+                                ${formattedDate}
+                                <div class="date-badge">${meal.day}</div>
+                            </td>
+                            <td>
+                                <span class="meal-badge ${meal.type}">
+                                    ${meal.type.charAt(0).toUpperCase() + meal.type.slice(1)}
+                                </span>
+                            </td>
+                            <td>${meal.time}</td>
+                            <td>${meal.day}</td>
+                        </tr>
+                    `;
+                }).join('');
+            }
+
+            renderPagination();
+        }
+
+        function renderPagination() {
+            const totalPages = Math.ceil(filteredMeals.length / itemsPerPage);
+            const pagination = document.getElementById('pagination');
+
+            if (totalPages <= 1) {
+                pagination.innerHTML = '';
+                return;
+            }
+
+            let html = '';
+
+            // Previous button
+            html += `<button class="page-btn" onclick="changePage(${currentPage - 1})" ${currentPage === 1 ? 'disabled' : ''}>◀</button>`;
+
+            // Page numbers
+            for (let i = 1; i <= totalPages; i++) {
+                if (i === 1 || i === totalPages || (i >= currentPage - 2 && i <= currentPage + 2)) {
+                    html += `<button class="page-btn ${i === currentPage ? 'active' : ''}" onclick="changePage(${i})">${i}</button>`;
+                } else if (i === currentPage - 3 || i === currentPage + 3) {
+                    html += `<span class="page-btn" style="border: none; background: none; cursor: default;">...</span>`;
+                }
+            }
+
+            // Next button
+            html += `<button class="page-btn" onclick="changePage(${currentPage + 1})" ${currentPage === totalPages ? 'disabled' : ''}>▶</button>`;
+
+            pagination.innerHTML = html;
+        }
+
+        function changePage(page) {
+            const totalPages = Math.ceil(filteredMeals.length / itemsPerPage);
+            if (page < 1 || page > totalPages) return;
+            currentPage = page;
+            renderTable();
+        }
+
+        function showMessage(msg, type) {
+            const messageDiv = document.getElementById('message');
+            messageDiv.className = `message ${type}`;
+            messageDiv.textContent = msg;
+
+            setTimeout(() => {
+                messageDiv.style.opacity = '0';
+                setTimeout(() => {
+                    messageDiv.style.opacity = '1';
+                    messageDiv.textContent = '';
+                    messageDiv.className = 'message';
+                }, 300);
+            }, 3000);
+        }
+
+        function escapeHtml(str) {
+            if (!str) return '';
+            return String(str)
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#039;');
+        }
+    </script>
+</body>
+
+</html>

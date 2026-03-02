@@ -1,0 +1,992 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hostel Mess Management - Home & Search</title>
+    
+    <!-- STRICT LOGIN PROTECTION -->
+    <script>
+        (function () {
+            // Prevent page from showing until we check login
+            document.documentElement.style.visibility = 'hidden';
+
+            // Check BOTH student and staff login
+            const studentLoggedIn = sessionStorage.getItem('studentLoggedIn') === 'true' || localStorage.getItem('studentLoggedIn') === 'true';
+            const staffLoggedIn = sessionStorage.getItem('staffLoggedIn') === 'true' || localStorage.getItem('staffLoggedIn') === 'true';
+            const isLoggedIn = studentLoggedIn || staffLoggedIn;
+
+            // If NOT logged in, redirect to login page
+            if (!isLoggedIn) {
+                window.location.replace('login.html');
+                return;
+            }
+
+            // If student is logged in but no account in URL, add it
+            if (studentLoggedIn && !staffLoggedIn) {
+                const params = new URLSearchParams(window.location.search);
+                const account = params.get('account_number');
+                const savedAccount = sessionStorage.getItem('studentAccount');
+
+                if (!account && savedAccount) {
+                    window.location.replace('index.html?account_number=' + encodeURIComponent(savedAccount));
+                    return;
+                }
+            }
+
+            // If staff is logged in, check if we need to add staff param
+            if (staffLoggedIn) {
+                const params = new URLSearchParams(window.location.search);
+                const isStaffParam = params.get('staff') === 'true';
+                
+                if (!isStaffParam) {
+                    window.location.replace('index.html?staff=true');
+                    return;
+                }
+            }
+
+            // If we get here, user is authenticated - show the page
+            document.documentElement.style.visibility = 'visible';
+        })();
+    </script>
+
+    <!-- PREVENT BACK BUTTON AFTER LOGOUT -->
+    <script>
+        (function() {
+            // Push a new state to history
+            history.pushState(null, null, location.href);
+            
+            // Handle back/forward button clicks
+            window.onpopstate = function() {
+                // Check if user is still logged in
+                const studentLoggedIn = sessionStorage.getItem('studentLoggedIn') === 'true' || localStorage.getItem('studentLoggedIn') === 'true';
+                const staffLoggedIn = sessionStorage.getItem('staffLoggedIn') === 'true' || localStorage.getItem('staffLoggedIn') === 'true';
+                
+                if (!studentLoggedIn && !staffLoggedIn) {
+                    // If not logged in, redirect to login page
+                    window.location.replace('login.html');
+                } else {
+                    // If logged in, push state again to prevent back
+                    history.pushState(null, null, location.href);
+                }
+            };
+        })();
+    </script>
+
+    <!-- PREVENT PAGE CACHING -->
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Segoe UI', sans-serif;
+            background: #f1f5f9;
+            color: #1e293b;
+            display: block !important;
+            padding-top: 10px;
+        }
+
+        /* ===== HEADER ===== */
+        .header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            background: rgba(12, 18, 28, 0.97);
+            padding: 16px 40px;
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
+            z-index: 1000;
+            overflow: visible !important;
+        }
+
+        .header-content {
+            display: flex;
+            align-items: center;
+            gap: 24px;
+            justify-content: space-between;
+        }
+
+        .header-logo {
+            width: 64px;
+            height: 64px;
+            border-radius: 50%;
+            background: #ffffff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+
+        .header-logo img {
+            width: 42px;
+            height: 42px;
+            border-radius: 50%;
+            object-fit: cover;
+        }
+
+        .header-text {
+            flex: 1;
+        }
+
+        .header-title {
+            font-size: 1.8rem;
+            font-weight: 800;
+            background: linear-gradient(90deg, #f43f5e, #fb7185, #fda4af);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        /* ===== STAFF BADGE ===== */
+        .staff-header-info {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+
+        .staff-badge {
+            background: #f43f5e;
+            color: white;
+            padding: 6px 16px;
+            border-radius: 30px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            box-shadow: 0 4px 10px rgba(244, 63, 94, 0.3);
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% {
+                box-shadow: 0 0 0 0 rgba(244, 63, 94, 0.7);
+            }
+            70% {
+                box-shadow: 0 0 0 10px rgba(244, 63, 94, 0);
+            }
+            100% {
+                box-shadow: 0 0 0 0 rgba(244, 63, 94, 0);
+            }
+        }
+
+        /* ===== NAVBAR ===== */
+        .navbar {
+            margin-top: 6px;
+            display: flex;
+            gap: 22px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .nav-item {
+            position: relative;
+            list-style: none;
+        }
+
+        .nav-link {
+            position: relative;
+            color: #d1d5db;
+            text-decoration: none;
+            font-size: 0.88rem;
+            font-weight: 600;
+            padding: 10px 0;
+            transition: color 0.25s;
+            display: block;
+        }
+
+        .nav-link:hover {
+            color: #f43f5e;
+        }
+
+        .nav-link::after {
+            content: "";
+            position: absolute;
+            left: 0;
+            bottom: -2px;
+            width: 0;
+            height: 2px;
+            background: #f43f5e;
+            transition: width 0.25s;
+        }
+
+        .nav-link:hover::after {
+            width: 100%;
+        }
+
+        /* ===== IMPROVED DROPDOWN ===== */
+        .dropdown {
+            position: relative;
+        }
+
+        .dropdown::after {
+            content: '';
+            position: absolute;
+            top: 100%;
+            left: 0;
+            width: 100%;
+            height: 20px;
+            background: transparent;
+        }
+
+        .dropdown-menu {
+            position: absolute;
+            top: calc(100% + 10px);
+            left: 50%;
+            transform: translateX(-50%);
+            background: linear-gradient(180deg, #0f172a, #020617);
+            border-radius: 16px;
+            min-width: 260px;
+            padding: 12px 0;
+            box-shadow: 0 25px 60px rgba(0, 0, 0, 0.55);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            opacity: 0;
+            visibility: hidden;
+            pointer-events: none;
+            transition: opacity 0.2s ease, visibility 0.2s ease;
+            z-index: 9999;
+        }
+
+        .dropdown:hover .dropdown-menu,
+        .dropdown-menu:hover {
+            opacity: 1;
+            visibility: visible;
+            pointer-events: auto;
+        }
+
+        .dropdown-menu::before {
+            content: '';
+            position: absolute;
+            top: -8px;
+            left: 50%;
+            transform: translateX(-50%);
+            border-left: 10px solid transparent;
+            border-right: 10px solid transparent;
+            border-bottom: 10px solid #0f172a;
+        }
+
+        .dropdown-menu a {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 14px 22px;
+            font-size: 0.95rem;
+            font-weight: 600;
+            color: #e5e7eb;
+            text-decoration: none;
+            transition: all 0.2s ease;
+            border-left: 3px solid transparent;
+        }
+
+        .dropdown-menu a:hover {
+            background: rgba(244, 63, 94, 0.15);
+            color: #f43f5e;
+            border-left-color: #f43f5e;
+        }
+
+        .dropdown-menu a:not(:last-child) {
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        /* ===== LOGOUT BUTTON ===== */
+        .logout-btn {
+            background: #dc2626;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+            margin-left: 20px;
+            transition: all 0.2s;
+            white-space: nowrap;
+        }
+
+        .logout-btn:hover {
+            background: #b91c1c;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(220, 38, 38, 0.3);
+        }
+
+        /* ===== CONTAINER ===== */
+        .container {
+            padding-top: 130px;
+        }
+
+        /* ===== SEARCH CARD ===== */
+        .search-card {
+            max-width: 520px;
+            margin: 40px auto 0 auto;
+            padding: 28px;
+            background: #ffffff;
+            border-radius: 18px;
+            box-shadow: 0 18px 40px rgba(0, 0, 0, 0.15);
+            text-align: center;
+        }
+
+        .search-form {
+            display: flex;
+            gap: 14px;
+            justify-content: center;
+        }
+
+        .search-form input {
+            flex: 1;
+            max-width: 320px;
+            height: 42px;
+            padding: 0 14px;
+            border-radius: 8px;
+            border: 1px solid #cbd5e1;
+            font-size: 0.9rem;
+            outline: none;
+        }
+
+        .search-form input:focus {
+            border-color: #f43f5e;
+        }
+
+        .search-form button {
+            height: 42px;
+            padding: 0 20px;
+            border-radius: 8px;
+            border: none;
+            background: #b3123c;
+            color: #fff;
+            font-weight: 700;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .search-form button:hover {
+            background: #9f0f35;
+        }
+
+        /* ===== ALERTS ===== */
+        .alert {
+            margin-top: 18px;
+            padding: 12px 16px;
+            border-radius: 10px;
+            font-size: 0.9rem;
+            font-weight: 600;
+        }
+
+        .alert-success {
+            background: #dcfce7;
+            color: #166534;
+            border: 1px solid #86efac;
+        }
+
+        .alert-error {
+            background: #fee2e2;
+            color: #991b1b;
+            border: 1px solid #fca5a5;
+        }
+
+        .alert-info {
+            background: #dbeafe;
+            color: #1e40af;
+            border: 1px solid #93c5fd;
+        }
+
+        /* ===== EMPTY STATE ===== */
+        .empty-state {
+            margin-top: 24px;
+            color: #94a3b8;
+        }
+
+        .empty-state svg {
+            width: 48px;
+            height: 48px;
+            margin: 0 auto 10px;
+            display: block;
+            color: #cbd5e1;
+        }
+
+        /* ===== LOADER ===== */
+        .loader {
+            display: none;
+            margin: 18px auto 0;
+            text-align: center;
+            color: #64748b;
+            font-size: 0.9rem;
+        }
+
+        .loader.show {
+            display: block;
+        }
+
+        /* ===== STUDENT DETAILS ===== */
+        .student-details {
+            max-width: 860px;
+            margin: 30px auto 40px auto;
+            background: #fff;
+            border-radius: 18px;
+            box-shadow: 0 12px 36px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+
+        .student-header {
+            display: flex;
+            align-items: center;
+            gap: 28px;
+            padding: 30px;
+            background: linear-gradient(135deg, #0f172a, #1e293b);
+            color: #fff;
+        }
+
+        .student-photo img {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 4px solid #f43f5e;
+        }
+
+        .student-basic-info h2 {
+            font-size: 1.5rem;
+            margin-bottom: 6px;
+        }
+
+        .student-basic-info p {
+            font-size: 0.88rem;
+            color: #cbd5e1;
+            margin: 2px 0;
+        }
+
+        .student-body {
+            padding: 28px;
+        }
+
+        .info-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+
+        .info-card {
+            background: #f8fafc;
+            border-radius: 12px;
+            padding: 18px;
+            border: 1px solid #e2e8f0;
+        }
+
+        .info-card h3 {
+            font-size: 0.9rem;
+            color: #64748b;
+            margin-bottom: 8px;
+        }
+
+        .food-preference {
+            display: inline-block;
+            padding: 4px 14px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 700;
+        }
+
+        .food-preference.veg {
+            background: #dcfce7;
+            color: #166534;
+        }
+
+        .food-preference.nonveg {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+
+        /* ===== MEAL SECTION ===== */
+        .meal-section {
+            margin-bottom: 24px;
+        }
+
+        .meal-section h3 {
+            font-size: 1rem;
+            font-weight: 700;
+            color: #1e293b;
+            margin-bottom: 14px;
+        }
+
+        .meal-buttons {
+            display: flex;
+            gap: 12px;
+        }
+
+        .btn-meal {
+            flex: 1;
+            padding: 16px 10px;
+            border: none;
+            border-radius: 12px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: opacity 0.2s, transform 0.1s;
+            text-align: center;
+        }
+
+        .btn-meal:hover:not(:disabled) {
+            opacity: 0.88;
+            transform: translateY(-1px);
+        }
+
+        .btn-meal:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .btn-meal.breakfast {
+            background: #fef9c3;
+            color: #713f12;
+            border: 1px solid #fde68a;
+        }
+
+        .btn-meal.lunch {
+            background: #dbeafe;
+            color: #1e3a8a;
+            border: 1px solid #93c5fd;
+        }
+
+        .btn-meal.dinner {
+            background: #ede9fe;
+            color: #4c1d95;
+            border: 1px solid #c4b5fd;
+        }
+
+        .btn-meal.recorded {
+            background: #f1f5f9;
+            color: #94a3b8;
+            border: 1px solid #e2e8f0;
+        }
+
+        .meal-time {
+            font-size: 0.75rem;
+            opacity: 0.7;
+        }
+
+        /* ===== ACTION BUTTONS ===== */
+        .action-buttons {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            flex: 1;
+            padding: 12px 20px;
+            border-radius: 10px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            text-decoration: none;
+            text-align: center;
+            border: none;
+            cursor: pointer;
+            transition: opacity 0.2s;
+            min-width: 140px;
+        }
+
+        .btn:hover {
+            opacity: 0.85;
+        }
+
+        .btn-primary {
+            background: #1e293b;
+            color: #fff;
+        }
+
+        .btn-secondary {
+            background: #f1f5f9;
+            color: #1e293b;
+            border: 1px solid #e2e8f0;
+        }
+
+        /* ===== RESPONSIVE ===== */
+        @media (max-width: 768px) {
+            .header {
+                padding: 14px 16px;
+            }
+
+            .header-content {
+                flex-wrap: wrap;
+            }
+
+            .staff-header-info {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 8px;
+            }
+
+            .navbar {
+                flex-wrap: wrap;
+                justify-content: center;
+                gap: 15px;
+            }
+
+            .container {
+                padding-top: 200px;
+            }
+
+            .dropdown-menu {
+                left: 0;
+                transform: none;
+            }
+
+            .dropdown-menu::before {
+                left: 30px;
+            }
+
+            .meal-buttons {
+                flex-direction: column;
+            }
+
+            .info-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .action-buttons {
+                flex-direction: column;
+            }
+
+            .student-header {
+                flex-direction: column;
+                text-align: center;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .search-form {
+                flex-direction: column;
+            }
+
+            .search-form button {
+                width: 100%;
+            }
+
+            .btn {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="header">
+        <div class="header-content">
+            <div class="header-logo">
+                <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='42' height='42' viewBox='0 0 24 24' fill='%23f43f5e'%3E%3Cpath d='M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z'/%3E%3C/svg%3E"
+                    alt="Hostel Logo">
+            </div>
+            <div class="header-text">
+                <div class="staff-header-info">
+                    <h1 class="header-title">Hostel Mess Management</h1>
+                    <span id="staffBadge" class="staff-badge" style="display: none;">👨‍🍳 Staff Mode</span>
+                </div>
+                <nav class="navbar">
+                    <div class="nav-item">
+                        <a href="index.html" class="nav-link">Home</a>
+                    </div>
+
+                    <div class="nav-item dropdown">
+                        <a href="register.html" class="nav-link">Register ▼</a>
+                        <div class="dropdown-menu">
+                            <a href="register.html">📝 New Student Register</a>
+                            <a href="staff.html">👨‍🍳 Mess Workers</a>
+                            
+                        </div>
+                    </div>
+
+                    <div class="nav-item">
+                        <a href="mess_entry_ui.html" class="nav-link">Meals-Tracking</a>
+                    </div>
+
+                    <div class="nav-item dropdown">
+                        <a href="menu.html" class="nav-link">Menu ▼</a>
+                        <div class="dropdown-menu">
+                            <a href="menu.html">📋 Today Menu</a>
+                            <a href="menu_upload.html">📅 Menu Upload</a>
+                            <a href="feedback_report.html">📊 Menu Feedback</a>
+                            <a href="feedback_list.html">📋 View Feedback</a>
+                        </div>
+                    </div>
+
+                    <div class="nav-item">
+                        <a href="tr.html" class="nav-link">Reports</a>
+                    </div>
+
+                    <button class="logout-btn" onclick="logout()">🚪 Logout</button>
+                </nav>
+            </div>
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="search-card">
+            <div class="search-form">
+                <input type="text" id="accountNumberInput" placeholder="Enter Student Account Number (e.g., 541)"
+                    oninput="debouncedSearch(this.value)">
+                <button onclick="triggerSearch()">Search</button>
+            </div>
+
+            <div id="alertBox"></div>
+            <div id="loader" class="loader">⏳ Searching...</div>
+
+            <div id="emptyState" class="empty-state">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                </svg>
+                <p>Enter a student account number to view details</p>
+            </div>
+        </div>
+
+        <div id="studentDetails"></div>
+    </div>
+
+    <script>
+        const API_URL = 'api.php';
+
+        let searchTimer = null;
+
+        // Check user type on page load
+        window.addEventListener('load', function () {
+            const params = new URLSearchParams(window.location.search);
+            const account = params.get('account_number');
+            const isStaff = params.get('staff') === 'true' || 
+                           sessionStorage.getItem('staffLoggedIn') === 'true' || 
+                           localStorage.getItem('staffLoggedIn') === 'true';
+            
+            // Show staff badge if staff is logged in
+            if (isStaff) {
+                document.getElementById('staffBadge').style.display = 'inline-flex';
+            }
+            
+            if (account) {
+                document.getElementById('accountNumberInput').value = account;
+                fetchStudent(account);
+            }
+        });
+
+        function debouncedSearch(value) {
+            clearTimeout(searchTimer);
+            if (!value.trim()) {
+                clearResults();
+                return;
+            }
+            searchTimer = setTimeout(() => fetchStudent(value.trim()), 600);
+        }
+
+        function triggerSearch() {
+            const val = document.getElementById('accountNumberInput').value.trim();
+            if (val) fetchStudent(val);
+        }
+
+        function clearResults() {
+            document.getElementById('alertBox').innerHTML = '';
+            document.getElementById('studentDetails').innerHTML = '';
+            document.getElementById('emptyState').style.display = 'block';
+        }
+
+        async function fetchStudent(accountNumber) {
+            setLoader(true);
+            clearResults();
+
+            try {
+                const res = await fetch(`${API_URL}?action=search&account_number=${encodeURIComponent(accountNumber)}`);
+                const data = await res.json();
+
+                setLoader(false);
+
+                if (data.success) {
+                    document.getElementById('emptyState').style.display = 'none';
+                    console.log('Student data:', data.data.student);
+                    console.log('Meals today:', data.data.meals_today);
+                    renderStudentCard(data.data.student, data.data.meals_today);
+                } else {
+                    const msg = (Array.isArray(data.errors) && data.errors.length)
+                        ? data.errors[0] : (data.message || 'Student not found.');
+                    showAlert(msg, 'error');
+                    document.getElementById('emptyState').style.display = 'none';
+                }
+            } catch (e) {
+                setLoader(false);
+                showAlert('Error connecting to server: ' + e.message, 'error');
+            }
+        }
+
+        async function recordMeal(accountNumber, mealType) {
+            const btn = event.target.closest('button');
+            const originalHTML = btn.innerHTML;
+            btn.innerHTML = '⏳ Recording...';
+            btn.disabled = true;
+
+            const now = new Date();
+            const pad = n => String(n).padStart(2, '0');
+            const clickTime = `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())} ${pad(now.getHours())}:${pad(now.getMinutes())}:${pad(now.getSeconds())}`;
+
+            try {
+                const res = await fetch(API_URL, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        action: 'record_meal',
+                        account_number: accountNumber,
+                        meal_type: mealType,
+                        click_time: clickTime
+                    })
+                });
+                const data = await res.json();
+
+                if (data.success) {
+                    showAlert('✅ ' + (data.data && data.data.message ? data.data.message : 'Meal recorded successfully!'), 'success');
+                    // Refresh the student card to update button states
+                    await fetchStudent(accountNumber);
+                } else {
+                    const errMsg = (Array.isArray(data.errors) && data.errors.length)
+                        ? data.errors[0] : 'Error recording meal.';
+                    showAlert('❌ ' + errMsg, 'error');
+                    btn.innerHTML = originalHTML;
+                    btn.disabled = false;
+                }
+            } catch (e) {
+                showAlert('❌ Error recording meal: ' + e.message, 'error');
+                btn.innerHTML = originalHTML;
+                btn.disabled = false;
+            }
+        }
+
+        function renderStudentCard(s, mealsToday) {
+            const photoSrc = s.photo_path || 'assets/images/default-profile.png';
+            const foodClass = s.food_preference === 'non-veg' ? 'nonveg' : 'veg';
+            const foodLabel = (s.food_preference === 'non-veg' ? '🍗 NON-VEG' : '🥦 VEG');
+
+            const mealBtn = (type, emoji, label, time) => {
+                const done = mealsToday && mealsToday[type];
+                return `
+                    <button class="btn-meal ${type} ${done ? 'recorded' : ''}" ${done ? 'disabled' : ''}
+                        onclick="recordMeal('${s.account_number}', '${type}')">
+                        ${emoji} ${label}<br>
+                        <span class="meal-time">${time}</span>
+                        ${done ? '<br><small style="color:#94a3b8">Already entered</small>' : ''}
+                    </button>
+                `;
+            };
+
+            const isStaff = sessionStorage.getItem('staffLoggedIn') === 'true' || localStorage.getItem('staffLoggedIn') === 'true';
+
+            document.getElementById('studentDetails').innerHTML = `
+                <div class="student-details">
+                    <div class="student-header">
+                        <div class="student-photo">
+                            <img src="${escHtml(photoSrc)}" alt="Student Photo" onerror="this.src='assets/images/default-profile.png'">
+                        </div>
+                        <div class="student-basic-info">
+                            <h2>${escHtml(s.full_name)}</h2>
+                            <p><strong>Account Number:</strong> ${escHtml(s.account_number)}</p>
+                            <p><strong>Phone:</strong> ${escHtml(s.phone || 'N/A')}</p>
+                            <p><strong>Hostel:</strong> ${escHtml(s.hostel_name || 'N/A')}</p>
+                            <p><strong>Room:</strong> ${escHtml(s.room_number || 'N/A')}</p>
+                        </div>
+                    </div>
+
+                    <div class="student-body">
+                        <div class="info-grid">
+                            <div class="info-card">
+                                <h3>🍽️ Food Preference</h3>
+                                <span class="food-preference ${foodClass}">${foodLabel}</span>
+                            </div>
+                            <div class="info-card">
+                                <h3>📅 Registered Since</h3>
+                                <p>${escHtml(s.registration_date || 'N/A')}</p>
+                            </div>
+                        </div>
+
+                        <div class="meal-section">
+                            <h3>🍴 Record Meal Entry for Today</h3>
+                            <div class="meal-buttons">
+                                ${mealBtn('breakfast', '🌅', 'Breakfast', '7:30 AM – 8:30 AM')}
+                                ${mealBtn('lunch', '🌤️', 'Lunch', '12:30 PM – 1:30 PM')}
+                                ${mealBtn('dinner', '🌙', 'Dinner', '7:00 PM – 8:00 PM')}
+                            </div>
+                        </div>
+
+                        <div class="action-buttons">
+                            <a href="edit.html?account_number=${encodeURIComponent(s.account_number)}" class="btn btn-primary">✏️ Edit Details</a>
+                            <a href="meal_history.html?account_number=${encodeURIComponent(s.account_number)}" class="btn btn-primary">📊 Meal History</a>
+                            ${isStaff ? '<a href="student_list.html" class="btn btn-secondary">👥 Student List</a>' : ''}
+                            <button class="btn btn-secondary" onclick="clearAll()">🔄 New Search</button>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function clearAll() {
+            document.getElementById('accountNumberInput').value = '';
+            clearResults();
+            document.getElementById('emptyState').style.display = 'block';
+        }
+
+        function showAlert(msg, type) {
+            const typeClass = type === 'success' ? 'alert-success' : type === 'info' ? 'alert-info' : 'alert-error';
+            document.getElementById('alertBox').innerHTML = `<div class="alert ${typeClass}">${msg}</div>`;
+        }
+
+        function setLoader(show) {
+            document.getElementById('loader').className = 'loader' + (show ? ' show' : '');
+        }
+
+        function escHtml(str) {
+            if (!str) return '';
+            return String(str)
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#039;');
+        }
+
+        function logout() {
+            if (confirm('Are you sure you want to logout?')) {
+                // Clear ALL session data
+                sessionStorage.clear();
+                localStorage.clear();
+                
+                // Redirect to login page and replace history
+                window.location.replace('login.html');
+            }
+        }
+
+        // Handle click outside dropdowns
+        document.addEventListener('click', function (e) {
+            if (!e.target.closest('.dropdown')) {
+                document.querySelectorAll('.dropdown-menu').forEach(menu => {
+                    menu.style.opacity = '0';
+                    menu.style.visibility = 'hidden';
+                    menu.style.pointerEvents = 'none';
+                });
+            }
+        });
+
+        // Handle dropdown hover
+        document.querySelectorAll('.dropdown').forEach(dropdown => {
+            dropdown.addEventListener('mouseenter', function () {
+                const menu = this.querySelector('.dropdown-menu');
+                if (menu) {
+                    menu.style.opacity = '1';
+                    menu.style.visibility = 'visible';
+                    menu.style.pointerEvents = 'auto';
+                }
+            });
+        });
+    </script>
+</body>
+
+</html>
